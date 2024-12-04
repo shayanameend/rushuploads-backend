@@ -1,6 +1,8 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
 import morgan from "morgan";
+
+import { authRouter } from "./routers/auth";
 
 const app = express();
 
@@ -10,8 +12,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-app.get("/", (_req, res) => {
-	res.json({ message: "Hello World" });
-});
+app.use("/auth", authRouter);
 
 export { app };
