@@ -3,19 +3,101 @@ import type { Request, Response } from "express";
 import { OtpType } from "@prisma/client";
 
 import { createOTP } from "../services/otp";
-import { createUser } from "../services/user";
+import { createUser, getUserByEmail } from "../services/user";
 
 async function signUp(request: Request, response: Response) {
-  const { email, password, role } = request.body;
+  try {
+    const { email, password, role } = request.body;
 
-  const { user } = await createUser({ email, password, role });
+    const { user: existingUser } = await getUserByEmail({ email, role });
 
-  const { otp } = await createOTP({
-    userId: user.id,
-    otpType: OtpType.VERIFY_EMAIL,
-  });
+    if (existingUser) {
+      throw new Error("User Already Exists!");
+    }
 
-  response.json({ data: { user, otp } });
+    const { user } = await createUser({ email, password, role });
+
+    if (!user) {
+      throw new Error("User not found!");
+    }
+
+    user.password = undefined;
+
+    const { otp } = await createOTP({
+      userId: user.id,
+      otpType: OtpType.VERIFY_EMAIL,
+    });
+
+    response.status(200).json({
+      data: { user },
+      message: "Sign Up Successfull!",
+    });
+
+    return;
+  } catch (error) {
+    response.status(500).json({
+      message: error.message,
+    });
+
+    return;
+  }
 }
 
-export { signUp };
+async function signIn(request: Request, response: Response) {
+  try {
+    const { email, password, role } = request.body;
+
+    const { user } = await getUserByEmail({ email, role });
+
+    if (!user) {
+      throw new Error("User Not Found!");
+    }
+
+    if (user.password !== password) {
+      throw new Error("Invalid Password!");
+    }
+
+    user.password = undefined;
+
+    if (!user.isVerified) {
+      const { otp } = await createOTP({
+        userId: user.id,
+        otpType: OtpType.VERIFY_EMAIL,
+      });
+
+      response.status(200).json({
+        data: { user },
+        message: "OTP Sent Successfully!",
+      });
+
+      return;
+    }
+
+    response.status(200).json({
+      data: { user },
+      message: "Sign In Successfull!",
+    });
+
+    return;
+  } catch (error) {
+    response.status(500).json({
+      message: error.message,
+    });
+
+    return;
+  }
+}
+
+async function verifyOtp(request: Request, response: Response) {
+  try {
+    const { otp, type } = request.body;
+  } catch (error) {
+    response.status(500).json({
+      message: error.message,
+    });
+
+    return;
+  }
+}
+
+export { signUp, signIn, verifyOtp };
