@@ -24,7 +24,7 @@ async function createUser(payload: Prisma.UserCreateInput) {
 }
 
 async function getUserById(query: { id: string; role?: Role }) {
-  const user = await prisma.user.findFirst({
+  const user = await prisma.user.findUnique({
     where: {
       id: query.id,
       role: query.role,
@@ -45,7 +45,7 @@ async function getUserById(query: { id: string; role?: Role }) {
 }
 
 async function getUserByEmail(query: { email: string; role?: Role }) {
-  const user = await prisma.user.findFirst({
+  const user = await prisma.user.findUnique({
     where: {
       email: query.email,
       role: query.role,
