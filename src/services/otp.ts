@@ -2,7 +2,10 @@ import type { OtpType } from "@prisma/client";
 
 import { prisma } from "../lib/prisma";
 
-async function upsertOTP(payload: { userId: string; otpType: OtpType }) {
+async function upsertOTP(
+  query: { userId: string },
+  payload: { otpType: OtpType },
+) {
   const sampleSpace = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
   let code = "";
@@ -13,10 +16,10 @@ async function upsertOTP(payload: { userId: string; otpType: OtpType }) {
 
   const otp = await prisma.otp.upsert({
     where: {
-      userId: payload.userId,
+      userId: query.userId,
     },
     create: {
-      userId: payload.userId,
+      userId: query.userId,
       code,
       type: payload.otpType,
     },

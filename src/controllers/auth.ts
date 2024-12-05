@@ -21,10 +21,10 @@ async function signUp(request: Request, response: Response) {
       throw new Error("User not found!");
     }
 
-    const { otp } = await upsertOTP({
-      userId: user.id,
-      otpType: OtpType.VERIFY_EMAIL,
-    });
+    const { otp } = await upsertOTP(
+      { userId: user.id },
+      { otpType: OtpType.VERIFY_EMAIL },
+    );
 
     user.password = undefined;
 
@@ -54,10 +54,10 @@ async function signIn(request: Request, response: Response) {
     }
 
     if (!user.password) {
-      const { otp } = await upsertOTP({
-        userId: user.id,
-        otpType: OtpType.VERIFY_EMAIL,
-      });
+      const { otp } = await upsertOTP(
+        { userId: user.id },
+        { otpType: OtpType.VERIFY_EMAIL },
+      );
 
       user.password = undefined;
 
@@ -74,10 +74,10 @@ async function signIn(request: Request, response: Response) {
     }
 
     if (!user.isVerified) {
-      const { otp } = await upsertOTP({
-        userId: user.id,
-        otpType: OtpType.VERIFY_EMAIL,
-      });
+      const { otp } = await upsertOTP(
+        { userId: user.id },
+        { otpType: OtpType.VERIFY_EMAIL },
+      );
 
       user.password = undefined;
 
