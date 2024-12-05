@@ -2,7 +2,7 @@ import type { OtpType } from "@prisma/client";
 
 import { prisma } from "../lib/prisma";
 
-async function createOTP(data: { userId: string; otpType: OtpType }) {
+async function upsertOTP(payload: { userId: string; otpType: OtpType }) {
   const sampleSpace = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
   let code = "";
@@ -11,11 +11,18 @@ async function createOTP(data: { userId: string; otpType: OtpType }) {
     code += sampleSpace[Math.floor(Math.random() * sampleSpace.length)];
   }
 
-  const otp = await prisma.otp.create({
-    data: {
-      userId: data.userId,
+  const otp = await prisma.otp.upsert({
+    where: {
+      userId: payload.userId,
+    },
+    create: {
+      userId: payload.userId,
       code,
-      type: data.otpType,
+      type: payload.otpType,
+    },
+    update: {
+      code,
+      type: payload.otpType,
     },
     select: {
       id: true,
@@ -40,4 +47,4 @@ async function createOTP(data: { userId: string; otpType: OtpType }) {
   return { otp };
 }
 
-export { createOTP };
+export { upsertOTP };

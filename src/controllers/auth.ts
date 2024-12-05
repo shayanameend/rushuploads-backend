@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 
 import { OtpType } from "@prisma/client";
 
-import { createOTP } from "../services/otp";
+import { upsertOTP } from "../services/otp";
 import { createUser, getUserByEmail } from "../services/user";
 
 async function signUp(request: Request, response: Response) {
@@ -21,12 +21,12 @@ async function signUp(request: Request, response: Response) {
       throw new Error("User not found!");
     }
 
-    user.password = undefined;
-
-    const { otp } = await createOTP({
+    const { otp } = await upsertOTP({
       userId: user.id,
       otpType: OtpType.VERIFY_EMAIL,
     });
+
+    user.password = undefined;
 
     response.status(200).json({
       data: { user },
@@ -53,17 +53,13 @@ async function signIn(request: Request, response: Response) {
       throw new Error("User Not Found!");
     }
 
-    if (user.password !== password) {
-      throw new Error("Invalid Password!");
-    }
-
-    user.password = undefined;
-
-    if (!user.isVerified) {
-      const { otp } = await createOTP({
+    if (!user.password) {
+      const { otp } = await upsertOTP({
         userId: user.id,
         otpType: OtpType.VERIFY_EMAIL,
       });
+
+      user.password = undefined;
 
       response.status(200).json({
         data: { user },
@@ -72,6 +68,28 @@ async function signIn(request: Request, response: Response) {
 
       return;
     }
+
+    if (user.password !== password) {
+      throw new Error("Invalid Password!");
+    }
+
+    if (!user.isVerified) {
+      const { otp } = await upsertOTP({
+        userId: user.id,
+        otpType: OtpType.VERIFY_EMAIL,
+      });
+
+      user.password = undefined;
+
+      response.status(200).json({
+        data: { user },
+        message: "OTP Sent Successfully!",
+      });
+
+      return;
+    }
+
+    user.password = undefined;
 
     response.status(200).json({
       data: { user },
