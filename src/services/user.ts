@@ -65,6 +65,33 @@ async function getUserByEmail(query: { email: string; role?: Role }) {
   return { user };
 }
 
+async function getUsers(
+  query: { role?: Role; skip: number; take: number } = {
+    role: "USER",
+    skip: 0,
+    take: 10,
+  },
+) {
+  const users = await prisma.user.findMany({
+    where: {
+      role: query.role,
+      isDeleted: false,
+    },
+    skip: query.skip,
+    take: query.take,
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      isVerified: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return { users };
+}
+
 async function updateUserById(
   query: { id: string; role?: Role },
   payload: Prisma.UserUpdateInput,
@@ -135,6 +162,7 @@ export {
   createUser,
   getUserById,
   getUserByEmail,
+  getUsers,
   updateUserById,
   updateUserByEmail,
   deleteUserById,
