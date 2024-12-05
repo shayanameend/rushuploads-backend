@@ -31,17 +31,6 @@ async function upsertOTP(
       id: true,
       code: true,
       type: true,
-      user: {
-        select: {
-          id: true,
-          email: true,
-          role: true,
-          isVerified: true,
-          isDeleted: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      },
       createdAt: true,
       updatedAt: true,
     },
@@ -50,4 +39,40 @@ async function upsertOTP(
   return { otp };
 }
 
-export { upsertOTP };
+async function getOTPByUser(query: { userId: string; type?: OtpType }) {
+  const otp = await prisma.otp.findUnique({
+    where: {
+      userId: query.userId,
+      type: query.type,
+    },
+    select: {
+      id: true,
+      code: true,
+      type: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return { otp };
+}
+
+async function deleteOTPByUser(query: { userId: string; type?: OtpType }) {
+  const otp = await prisma.otp.delete({
+    where: {
+      userId: query.userId,
+      type: query.type,
+    },
+    select: {
+      id: true,
+      code: true,
+      type: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return { otp };
+}
+
+export { upsertOTP, getOTPByUser, deleteOTPByUser };

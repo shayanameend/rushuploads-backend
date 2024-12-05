@@ -2,8 +2,13 @@ import type { Request, Response } from "express";
 
 import { OtpType } from "@prisma/client";
 
-import { upsertOTP } from "../services/otp";
-import { createUser, getUserByEmail } from "../services/user";
+import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
+import {
+  createUser,
+  getUserByEmail,
+  getUserById,
+  updateUserById,
+} from "../services/user";
 
 async function signUp(request: Request, response: Response) {
   try {
@@ -109,6 +114,36 @@ async function signIn(request: Request, response: Response) {
 async function verifyOtp(request: Request, response: Response) {
   try {
     const { otp, type } = request.body;
+
+    const { id: userId } = request.user; // TODO: User ID from JWT
+
+    const { user } = await getUserById({ id: userId });
+
+    if (!user) {
+      throw new Error("User Not Found!");
+    }
+
+    const { otp: existingOtp } = await getOTPByUser({ userId, type });
+
+    if (!existingOtp) {
+      throw new Error("Invalid OTP!");
+    }
+
+    if (existingOtp.code !== otp) {
+      throw new Error("Invalid OTP!");
+    }
+
+    await deleteOTPByUser({ userId, type });
+
+    if (type === OtpType.VERIFY_EMAIL) {
+      await updateUserById({ id: userId }, { isVerified: true });
+    }
+
+    response.status(200).json({
+      message: "OTP Verified Successfully!",
+    });
+
+    return;
   } catch (error) {
     response.status(500).json({
       message: error.message,
