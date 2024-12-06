@@ -1,10 +1,8 @@
 import type { Role, User } from "@prisma/client";
 import type { NextFunction, Request, Response } from "express";
 
-import jwt from "jsonwebtoken";
-
-import { env } from "../lib/env";
 import { getUserById } from "../services/user";
+import { verifyToken } from "../services/jwt";
 
 interface VerifyRequestParams {
   role?: Role;
@@ -26,7 +24,7 @@ function verifyRequest({ role, isVerified }: Readonly<VerifyRequestParams>) {
 
       const token = bearerToken.split(" ")[1];
 
-      const decodedUser = jwt.verify(token, env.JWT_SECRET) as User;
+      const decodedUser = (await verifyToken(token)) as User;
 
       if (role && decodedUser.role !== role) {
         res.status(403).json({

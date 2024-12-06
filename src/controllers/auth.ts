@@ -6,6 +6,7 @@ import argon from "argon2";
 import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
 import { createUser, getUserByEmail, updateUserById } from "../services/user";
 import { sendMail } from "../services/mail";
+import { signToken } from "../services/jwt";
 
 async function signUp(request: Request, response: Response) {
   try {
@@ -17,7 +18,11 @@ async function signUp(request: Request, response: Response) {
       throw new Error("User Already Exists!");
     }
 
-    const hashedPassword = await argon.hash(password);
+    let hashedPassword: string | undefined;
+
+    if (password) {
+      hashedPassword = await argon.hash(password);
+    }
 
     const { user } = await createUser({
       email,
@@ -29,6 +34,17 @@ async function signUp(request: Request, response: Response) {
       throw new Error("User not found!");
     }
 
+    user.isVerified = user.password ? user.isVerified : false;
+
+    const token = await signToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      isVerified: user.isVerified,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    });
+
     const { otp } = await upsertOTP(
       { userId: user.id },
       { otpType: OtpType.VERIFY_EMAIL },
@@ -37,13 +53,13 @@ async function signUp(request: Request, response: Response) {
     await sendMail({
       to: user.email,
       subject: "Verify Email",
-      body: `Your OTP is: ${otp.code}`,
+      body: `Your otp is: ${otp.code}`,
     });
 
     user.password = undefined;
 
     response.status(200).json({
-      data: { user },
+      data: { user, token },
       message: "Sign Up Successfull!",
     });
 
@@ -67,6 +83,17 @@ async function signIn(request: Request, response: Response) {
       throw new Error("User Not Found!");
     }
 
+    user.isVerified = user.password ? user.isVerified : false;
+
+    const token = await signToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      isVerified: user.isVerified,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    });
+
     if (!user.password) {
       const { otp } = await upsertOTP(
         { userId: user.id },
@@ -76,13 +103,13 @@ async function signIn(request: Request, response: Response) {
       await sendMail({
         to: user.email,
         subject: "Verify Email",
-        body: `Your OTP is: ${otp.code}`,
+        body: `Your otp is: ${otp.code}`,
       });
 
       user.password = undefined;
 
       response.status(200).json({
-        data: { user },
+        data: { user, token },
         message: "OTP Sent Successfully!",
       });
 
@@ -104,13 +131,13 @@ async function signIn(request: Request, response: Response) {
       await sendMail({
         to: user.email,
         subject: "Verify Email",
-        body: `Your OTP is: ${otp.code}`,
+        body: `Your otp is: ${otp.code}`,
       });
 
       user.password = undefined;
 
       response.status(200).json({
-        data: { user },
+        data: { user, token },
         message: "OTP Sent Successfully!",
       });
 
@@ -120,7 +147,7 @@ async function signIn(request: Request, response: Response) {
     user.password = undefined;
 
     response.status(200).json({
-      data: { user },
+      data: { user, token },
       message: "Sign In Successfull!",
     });
 
@@ -140,6 +167,17 @@ async function verifyOtp(request: Request, response: Response) {
 
     const { otp, type } = request.body;
 
+    user.isVerified = true;
+
+    const token = await signToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      isVerified: user.isVerified,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    });
+
     const { otp: existingOtp } = await getOTPByUser({ userId: user.id, type });
 
     if (!existingOtp) {
@@ -151,16 +189,13 @@ async function verifyOtp(request: Request, response: Response) {
     }
 
     if (type === OtpType.VERIFY_EMAIL) {
-      if (user.isVerified) {
-        throw new Error("User Already Verified!");
-      }
-
       await updateUserById({ id: user.id }, { isVerified: true });
     }
 
     await deleteOTPByUser({ userId: user.id, type });
 
     response.status(200).json({
+      data: { user, token },
       message: "OTP Verified Successfully!",
     });
 

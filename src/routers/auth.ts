@@ -7,6 +7,6 @@ const authRouter = Router();
 
 authRouter.post("/sign-up", signUp);
 authRouter.post("/sign-in", signIn);
-authRouter.post("/verify-otp", verifyRequest({}), verifyOtp);
+authRouter.post("/verify-otp", verifyRequest({ isVerified: false }), verifyOtp);
 
 export { authRouter };

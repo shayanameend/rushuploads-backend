@@ -4,10 +4,10 @@ declare global {
   namespace Express {
     export interface Request {
       user?: {
-        role: Role;
-        isVerified: boolean;
         id: string;
         email: string;
+        role: Role;
+        isVerified: boolean;
         createdAt: Date;
         updatedAt: Date;
       };
