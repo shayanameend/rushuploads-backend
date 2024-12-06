@@ -5,6 +5,7 @@ import argon from "argon2";
 
 import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
 import { createUser, getUserByEmail, updateUserById } from "../services/user";
+import { sendMail } from "../services/mail";
 
 async function signUp(request: Request, response: Response) {
   try {
@@ -32,6 +33,12 @@ async function signUp(request: Request, response: Response) {
       { userId: user.id },
       { otpType: OtpType.VERIFY_EMAIL },
     );
+
+    await sendMail({
+      to: user.email,
+      subject: "Verify Email",
+      body: `Your OTP is: ${otp.code}`,
+    });
 
     user.password = undefined;
 
@@ -66,6 +73,12 @@ async function signIn(request: Request, response: Response) {
         { otpType: OtpType.VERIFY_EMAIL },
       );
 
+      await sendMail({
+        to: user.email,
+        subject: "Verify Email",
+        body: `Your OTP is: ${otp.code}`,
+      });
+
       user.password = undefined;
 
       response.status(200).json({
@@ -87,6 +100,12 @@ async function signIn(request: Request, response: Response) {
         { userId: user.id },
         { otpType: OtpType.VERIFY_EMAIL },
       );
+
+      await sendMail({
+        to: user.email,
+        subject: "Verify Email",
+        body: `Your OTP is: ${otp.code}`,
+      });
 
       user.password = undefined;
 
