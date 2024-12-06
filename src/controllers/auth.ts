@@ -113,17 +113,11 @@ async function signIn(request: Request, response: Response) {
 
 async function verifyOtp(request: Request, response: Response) {
   try {
+    const { user } = request;
+
     const { otp, type } = request.body;
 
-    const { id: userId } = request.user; // TODO: User ID from JWT
-
-    const { user } = await getUserById({ id: userId });
-
-    if (!user) {
-      throw new Error("User Not Found!");
-    }
-
-    const { otp: existingOtp } = await getOTPByUser({ userId, type });
+    const { otp: existingOtp } = await getOTPByUser({ userId: user.id, type });
 
     if (!existingOtp) {
       throw new Error("Invalid OTP!");
@@ -133,11 +127,15 @@ async function verifyOtp(request: Request, response: Response) {
       throw new Error("Invalid OTP!");
     }
 
-    await deleteOTPByUser({ userId, type });
-
     if (type === OtpType.VERIFY_EMAIL) {
-      await updateUserById({ id: userId }, { isVerified: true });
+      if (user.isVerified) {
+        throw new Error("User Already Verified!");
+      }
+
+      await updateUserById({ id: user.id }, { isVerified: true });
     }
+
+    await deleteOTPByUser({ userId: user.id, type });
 
     response.status(200).json({
       message: "OTP Verified Successfully!",
