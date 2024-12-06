@@ -1,8 +1,8 @@
 import type { Role, User } from "@prisma/client";
 import type { NextFunction, Request, Response } from "express";
 
-import { getUserById } from "../services/user";
 import { verifyToken } from "../services/jwt";
+import { getUserById } from "../services/user";
 
 interface VerifyRequestParams {
   role?: Role;

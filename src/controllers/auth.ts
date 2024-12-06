@@ -3,10 +3,10 @@ import type { Request, Response } from "express";
 import { OtpType } from "@prisma/client";
 import argon from "argon2";
 
+import { signToken } from "../services/jwt";
+import { sendMail } from "../services/mail";
 import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
 import { createUser, getUserByEmail, updateUserById } from "../services/user";
-import { sendMail } from "../services/mail";
-import { signToken } from "../services/jwt";
 
 async function signUp(request: Request, response: Response) {
   try {
