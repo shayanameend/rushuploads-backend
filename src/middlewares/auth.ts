@@ -1,5 +1,5 @@
-import type { NextFunction, Request, Response } from "express";
 import type { Role, User } from "@prisma/client";
+import type { NextFunction, Request, Response } from "express";
 
 import jwt from "jsonwebtoken";
 

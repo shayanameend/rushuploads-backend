@@ -1,14 +1,10 @@
 import type { Request, Response } from "express";
 
 import { OtpType } from "@prisma/client";
+import argon from "argon2";
 
 import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
-import {
-  createUser,
-  getUserByEmail,
-  getUserById,
-  updateUserById,
-} from "../services/user";
+import { createUser, getUserByEmail, updateUserById } from "../services/user";
 
 async function signUp(request: Request, response: Response) {
   try {
@@ -20,7 +16,13 @@ async function signUp(request: Request, response: Response) {
       throw new Error("User Already Exists!");
     }
 
-    const { user } = await createUser({ email, password, role });
+    const hashedPassword = await argon.hash(password);
+
+    const { user } = await createUser({
+      email,
+      password: hashedPassword,
+      role,
+    });
 
     if (!user) {
       throw new Error("User not found!");
@@ -74,7 +76,9 @@ async function signIn(request: Request, response: Response) {
       return;
     }
 
-    if (user.password !== password) {
+    const isPasswordValid = await argon.verify(user.password, password);
+
+    if (!isPasswordValid) {
       throw new Error("Invalid Password!");
     }
 
