@@ -14,11 +14,9 @@ async function sendMail({ to, subject, body }: Readonly<MailOptions>) {
       subject,
       text: body,
     },
-    (err, info) => {
+    (err) => {
       if (err) {
         console.error(err);
-      } else {
-        console.log(info);
       }
     },
   );
