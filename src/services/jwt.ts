@@ -1,4 +1,4 @@
-import type { Role, User } from "@prisma/client";
+import type { Role } from "@prisma/client";
 
 import jwt from "jsonwebtoken";
 
