@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 
-import { handleErrors } from "../lib/error";
-import { getUsers } from "../services/user";
-import { getAllUsersSchema } from "../validators/user";
+import { BadResponse, handleErrors } from "../lib/error";
+import { getUserById, getUsers } from "../services/user";
+import { getAllUsersSchema, getOneUserSchema } from "../validators/user";
 
 async function getAllUsers(request: Request, response: Response) {
   try {
@@ -40,4 +40,27 @@ async function getAllUsers(request: Request, response: Response) {
   }
 }
 
-export { getAllUsers };
+async function getOneUser(request: Request, response: Response) {
+  try {
+    const { userId } = getOneUserSchema.parse(request.params);
+
+    const user = await getUserById({ id: userId });
+
+    if (!user) {
+      throw new BadResponse("User not found!");
+    }
+
+    response.success(
+      {
+        data: { user },
+      },
+      { message: "User fetched successfully!" },
+    );
+  } catch (error) {
+    handleErrors(response, error);
+
+    return;
+  }
+}
+
+export { getAllUsers, getOneUser };

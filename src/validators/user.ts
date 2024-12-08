@@ -40,4 +40,10 @@ const getAllUsersSchema = zod.object({
     .optional(),
 });
 
-export { getAllUsersSchema };
+const getOneUserSchema = zod.object({
+  userId: zod.string({
+    message: "User ID must be a string",
+  }),
+});
+
+export { getAllUsersSchema, getOneUserSchema };
