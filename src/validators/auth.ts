@@ -22,7 +22,7 @@ const signUpSchema = zod.object({
     .optional(),
   role: zod
     .enum([Role.USER, Role.ADMIN], {
-      message: "Invalid Role",
+      message: "Role must be either 'USER' or 'ADMIN'",
     })
     .optional(),
 });
@@ -48,7 +48,7 @@ const signInSchema = zod.object({
     .optional(),
   role: zod
     .enum([Role.USER, Role.ADMIN], {
-      message: "Invalid Role",
+      message: "Role must be either 'USER' or 'ADMIN'",
     })
     .optional(),
 });
