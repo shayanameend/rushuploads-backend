@@ -8,10 +8,8 @@ export type JSON =
   | null
   | Date
   | Error
-  | JSONArray
+  | Array<JSON>
   | JSONObject;
-
-export interface JSONArray extends Array<JSON> {}
 
 export interface JSONObject {
   [x: string]: JSON;
