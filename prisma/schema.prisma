@@ -24,6 +24,10 @@ model User {
   otpId String? @map("otp_id") @db.ObjectId
   otp   Otp?
 
+  files File[]
+
+  sharedFiles SharedFile[]
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 }
@@ -40,6 +44,40 @@ model Otp {
   type OtpType
 
   userId String @unique @map("user_id") @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+}
+
+enum FileType {
+  IMAGE
+  VIDEO
+  PDF
+}
+
+model File {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name String
+  type FileType
+
+  userId String @map("user_id") @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  sharedFiles SharedFile[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+}
+
+model SharedFile {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  fileId String @map("file_id") @db.ObjectId
+  file   File   @relation(fields: [fileId], references: [id])
+
+  userId String @map("user_id") @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
