@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
 
 import { BadResponse, handleErrors } from "../lib/error";
-import { prisma } from "../lib/prisma";
 import {
   deleteUserById,
   getUserById,
