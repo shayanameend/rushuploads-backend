@@ -3,7 +3,7 @@ import type { NextFunction, Request, Response } from "express";
 import type { Info, JSONObject } from "../../types";
 
 async function expandResponse(
-  request: Request,
+  _request: Request,
   response: Response,
   next: NextFunction,
 ) {
