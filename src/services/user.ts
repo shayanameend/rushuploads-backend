@@ -1,4 +1,4 @@
-import type { Prisma, Role } from "@prisma/client";
+import { type Prisma, Role } from "@prisma/client";
 
 import { prisma } from "../lib/prisma";
 
@@ -66,19 +66,28 @@ async function getUserByEmail(query: { email: string; role?: Role }) {
 }
 
 async function getUsers(
-  query: { role?: Role; skip: number; take: number } = {
-    role: "USER",
+  query: {
+    text?: string;
+    role?: Role;
+    isVerified?: boolean;
+    isDeleted?: boolean;
+    skip?: number;
+    take?: number;
+  } = {
+    role: Role.USER,
     skip: 0,
     take: 10,
   },
 ) {
   const users = await prisma.user.findMany({
     where: {
+      email: {
+        contains: query.text,
+      },
       role: query.role,
-      isDeleted: false,
+      isVerified: query.isVerified,
+      isDeleted: query.isDeleted,
     },
-    skip: query.skip,
-    take: query.take,
     select: {
       id: true,
       email: true,
@@ -87,6 +96,8 @@ async function getUsers(
       createdAt: true,
       updatedAt: true,
     },
+    skip: query.skip,
+    take: query.take,
   });
 
   return { users };
