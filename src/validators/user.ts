@@ -46,4 +46,10 @@ const getOneUserSchema = zod.object({
   }),
 });
 
-export { getAllUsersSchema, getOneUserSchema };
+const deleteOneUserSchema = zod.object({
+  userId: zod.string({
+    message: "User ID must be a string",
+  }),
+});
+
+export { getAllUsersSchema, getOneUserSchema, deleteOneUserSchema };

@@ -1,8 +1,13 @@
 import type { Request, Response } from "express";
 
 import { BadResponse, handleErrors } from "../lib/error";
-import { getUserById, getUsers } from "../services/user";
-import { getAllUsersSchema, getOneUserSchema } from "../validators/user";
+import { prisma } from "../lib/prisma";
+import { deleteUserById, getUserById, getUsers } from "../services/user";
+import {
+  deleteOneUserSchema,
+  getAllUsersSchema,
+  getOneUserSchema,
+} from "../validators/user";
 
 async function getAllUsers(request: Request, response: Response) {
   try {
@@ -63,4 +68,24 @@ async function getOneUser(request: Request, response: Response) {
   }
 }
 
-export { getAllUsers, getOneUser };
+async function deleteOneUser(request: Request, response: Response) {
+  try {
+    const { userId } = deleteOneUserSchema.parse(request.params);
+
+    const user = await getUserById({ id: userId });
+
+    if (!user) {
+      throw new BadResponse("User not found!");
+    }
+
+    await deleteUserById({ id: userId });
+
+    response.success({}, { message: "User deleted successfully!" });
+  } catch (error) {
+    handleErrors(response, error);
+
+    return;
+  }
+}
+
+export { getAllUsers, getOneUser, deleteOneUser };
