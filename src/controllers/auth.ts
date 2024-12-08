@@ -8,10 +8,15 @@ import { signToken } from "../services/jwt";
 import { sendMail } from "../services/mail";
 import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
 import { createUser, getUserByEmail, updateUserById } from "../services/user";
+import {
+  signInSchema,
+  signUpSchema,
+  verifyOtpSchema,
+} from "../validators/auth";
 
 async function signUp(request: Request, response: Response) {
   try {
-    const { email, password, role } = request.body;
+    const { email, password, role } = signUpSchema.parse(request.body);
 
     const { user: existingUser } = await getUserByEmail({ email, role });
 
@@ -78,7 +83,7 @@ async function signUp(request: Request, response: Response) {
 
 async function signIn(request: Request, response: Response) {
   try {
-    const { email, password, role } = request.body;
+    const { email, password, role } = signInSchema.parse(request.body);
 
     const { user } = await getUserByEmail({ email, role });
 
@@ -178,7 +183,7 @@ async function verifyOtp(request: Request, response: Response) {
   try {
     const { user } = request;
 
-    const { otp, type } = request.body;
+    const { otp, type } = verifyOtpSchema.parse(request.body);
 
     user.isVerified = true;
 
