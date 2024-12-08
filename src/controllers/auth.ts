@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { OtpType } from "@prisma/client";
 import argon from "argon2";
 
+import { BadResponse, NotFoundResponse, handleErrors } from "../lib/error";
 import { signToken } from "../services/jwt";
 import { sendMail } from "../services/mail";
 import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
@@ -15,7 +16,7 @@ async function signUp(request: Request, response: Response) {
     const { user: existingUser } = await getUserByEmail({ email, role });
 
     if (existingUser) {
-      throw new Error("User Already Exists!");
+      throw new BadResponse("User Already Exists!");
     }
 
     let hashedPassword: string | undefined;
@@ -31,7 +32,7 @@ async function signUp(request: Request, response: Response) {
     });
 
     if (!user) {
-      throw new Error("User not found!");
+      throw new NotFoundResponse("User not found!");
     }
 
     user.isVerified = user.password ? user.isVerified : false;
@@ -58,16 +59,18 @@ async function signUp(request: Request, response: Response) {
 
     user.password = undefined;
 
-    response.status(200).json({
-      data: { user, token },
-      message: "Sign Up Successfull!",
-    });
+    response.success(
+      {
+        data: { user, token },
+      },
+      {
+        message: "Sign Up Successfull!",
+      },
+    );
 
     return;
   } catch (error) {
-    response.status(500).json({
-      message: error.message,
-    });
+    handleErrors(response, error);
 
     return;
   }
@@ -80,7 +83,7 @@ async function signIn(request: Request, response: Response) {
     const { user } = await getUserByEmail({ email, role });
 
     if (!user) {
-      throw new Error("User Not Found!");
+      throw new NotFoundResponse("User Not Found!");
     }
 
     user.isVerified = user.password ? user.isVerified : false;
@@ -108,10 +111,14 @@ async function signIn(request: Request, response: Response) {
 
       user.password = undefined;
 
-      response.status(200).json({
-        data: { user, token },
-        message: "OTP Sent Successfully!",
-      });
+      response.success(
+        {
+          data: { user, token },
+        },
+        {
+          message: "OTP Sent Successfully!",
+        },
+      );
 
       return;
     }
@@ -119,7 +126,7 @@ async function signIn(request: Request, response: Response) {
     const isPasswordValid = await argon.verify(user.password, password);
 
     if (!isPasswordValid) {
-      throw new Error("Invalid Password!");
+      throw new BadResponse("Invalid Password!");
     }
 
     if (!user.isVerified) {
@@ -136,26 +143,32 @@ async function signIn(request: Request, response: Response) {
 
       user.password = undefined;
 
-      response.status(200).json({
-        data: { user, token },
-        message: "OTP Sent Successfully!",
-      });
+      response.success(
+        {
+          data: { user, token },
+        },
+        {
+          message: "OTP Sent Successfully!",
+        },
+      );
 
       return;
     }
 
     user.password = undefined;
 
-    response.status(200).json({
-      data: { user, token },
-      message: "Sign In Successfull!",
-    });
+    response.success(
+      {
+        data: { user, token },
+      },
+      {
+        message: "Sign In Successfull!",
+      },
+    );
 
     return;
   } catch (error) {
-    response.status(500).json({
-      message: error.message,
-    });
+    handleErrors(response, error);
 
     return;
   }
@@ -181,11 +194,11 @@ async function verifyOtp(request: Request, response: Response) {
     const { otp: existingOtp } = await getOTPByUser({ userId: user.id, type });
 
     if (!existingOtp) {
-      throw new Error("Invalid OTP!");
+      throw new BadResponse("Invalid OTP!");
     }
 
     if (existingOtp.code !== otp) {
-      throw new Error("Invalid OTP!");
+      throw new BadResponse("Invalid OTP!");
     }
 
     if (type === OtpType.VERIFY_EMAIL) {
@@ -194,16 +207,18 @@ async function verifyOtp(request: Request, response: Response) {
 
     await deleteOTPByUser({ userId: user.id, type });
 
-    response.status(200).json({
-      data: { user, token },
-      message: "OTP Verified Successfully!",
-    });
+    response.success(
+      {
+        data: { user, token },
+      },
+      {
+        message: "OTP Verified Successfully!",
+      },
+    );
 
     return;
   } catch (error) {
-    response.status(500).json({
-      message: error.message,
-    });
+    handleErrors(response, error);
 
     return;
   }

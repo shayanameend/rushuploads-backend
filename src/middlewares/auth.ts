@@ -1,6 +1,13 @@
 import type { Role, User } from "@prisma/client";
 import type { NextFunction, Request, Response } from "express";
 
+import {
+  BadResponse,
+  ForbiddenResponse,
+  NotFoundResponse,
+  UnauthorizedResponse,
+  handleErrors,
+} from "../lib/error";
 import { verifyToken } from "../services/jwt";
 import { getUserById } from "../services/user";
 
@@ -10,16 +17,12 @@ interface VerifyRequestParams {
 }
 
 function verifyRequest({ role, isVerified }: Readonly<VerifyRequestParams>) {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const bearerToken = req.headers.authorization;
+      const bearerToken = request.headers.authorization;
 
       if (!bearerToken) {
-        res.status(401).json({
-          message: "Unauthorized!",
-        });
-
-        return;
+        throw new UnauthorizedResponse("Unauthorized!");
       }
 
       const token = bearerToken.split(" ")[1];
@@ -27,36 +30,26 @@ function verifyRequest({ role, isVerified }: Readonly<VerifyRequestParams>) {
       const decodedUser = (await verifyToken(token)) as User;
 
       if (role && decodedUser.role !== role) {
-        res.status(403).json({
-          message: "Forbidden!",
-        });
-
-        return;
+        throw new ForbiddenResponse("Forbidden!");
       }
 
       if (isVerified && !decodedUser.isVerified) {
-        res.status(403).json({
-          message: "User Not Verified!",
-        });
-
-        return;
+        throw new BadResponse("User Not Verified!");
       }
 
       const { user } = await getUserById({ id: decodedUser.id });
 
       if (!user) {
-        throw new Error("User Not Found!");
+        throw new NotFoundResponse("User Not Found!");
       }
 
       user.password = undefined;
 
-      req.user = user;
+      request.user = user;
 
       next();
     } catch (error) {
-      res.status(401).json({
-        message: "Unauthorized!",
-      });
+      handleErrors(response, error);
 
       return;
     }
