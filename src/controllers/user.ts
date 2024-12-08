@@ -2,11 +2,17 @@ import type { Request, Response } from "express";
 
 import { BadResponse, handleErrors } from "../lib/error";
 import { prisma } from "../lib/prisma";
-import { deleteUserById, getUserById, getUsers } from "../services/user";
 import {
-  deleteOneUserSchema,
-  getAllUsersSchema,
-  getOneUserSchema,
+  deleteUserById,
+  getUserById,
+  getUsers,
+  updateUserById,
+} from "../services/user";
+import {
+  deleteOneUserParamsSchema,
+  getAllUsersQuerySchema,
+  getOneUserParamsSchema,
+  updateOneUserBodySchema,
 } from "../validators/user";
 
 async function getAllUsers(request: Request, response: Response) {
@@ -18,7 +24,7 @@ async function getAllUsers(request: Request, response: Response) {
       isDeleted,
       page = 1,
       limit = 10,
-    } = getAllUsersSchema.parse(request.query);
+    } = getAllUsersQuerySchema.parse(request.query);
 
     const skip = (page - 1) * limit;
     const take = limit;
@@ -47,7 +53,7 @@ async function getAllUsers(request: Request, response: Response) {
 
 async function getOneUser(request: Request, response: Response) {
   try {
-    const { userId } = getOneUserSchema.parse(request.params);
+    const { userId } = getOneUserParamsSchema.parse(request.params);
 
     const user = await getUserById({ id: userId });
 
@@ -68,9 +74,12 @@ async function getOneUser(request: Request, response: Response) {
   }
 }
 
-async function deleteOneUser(request: Request, response: Response) {
+async function updateOneUser(request: Request, response: Response) {
   try {
-    const { userId } = deleteOneUserSchema.parse(request.params);
+    const { userId } = getOneUserParamsSchema.parse(request.params);
+    const { role, isVerified, isDeleted } = updateOneUserBodySchema.parse(
+      request.body,
+    );
 
     const user = await getUserById({ id: userId });
 
@@ -78,9 +87,17 @@ async function deleteOneUser(request: Request, response: Response) {
       throw new BadResponse("User not found!");
     }
 
-    await deleteUserById({ id: userId });
+    const { user: updatedUser } = await updateUserById(
+      { id: userId },
+      { role, isVerified, isDeleted },
+    );
 
-    response.success({}, { message: "User deleted successfully!" });
+    response.success(
+      {
+        data: { user: updatedUser },
+      },
+      { message: "User updated successfully!" },
+    );
   } catch (error) {
     handleErrors(response, error);
 
@@ -88,4 +105,29 @@ async function deleteOneUser(request: Request, response: Response) {
   }
 }
 
-export { getAllUsers, getOneUser, deleteOneUser };
+async function deleteOneUser(request: Request, response: Response) {
+  try {
+    const { userId } = deleteOneUserParamsSchema.parse(request.params);
+
+    const user = await getUserById({ id: userId });
+
+    if (!user) {
+      throw new BadResponse("User not found!");
+    }
+
+    const { user: deletedUser } = await deleteUserById({ id: userId });
+
+    response.success(
+      {
+        data: { user: deletedUser },
+      },
+      { message: "User deleted successfully!" },
+    );
+  } catch (error) {
+    handleErrors(response, error);
+
+    return;
+  }
+}
+
+export { getAllUsers, getOneUser, updateOneUser, deleteOneUser };
