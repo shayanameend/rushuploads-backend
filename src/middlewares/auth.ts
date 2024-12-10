@@ -8,7 +8,7 @@ import {
   UnauthorizedResponse,
   handleErrors,
 } from "../lib/error";
-import { verifyToken } from "../services/jwt";
+import { verifyToken } from "../utils/jwt";
 import { getUserById } from "../services/user";
 
 interface VerifyRequestParams {
