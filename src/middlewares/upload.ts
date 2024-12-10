@@ -49,7 +49,11 @@ function fileFilter(
   cb(new BadResponse(message));
 }
 
-function upload(request: Request, response: Response, next: NextFunction) {
+function multerUpload(
+  request: Request,
+  response: Response,
+  next: NextFunction,
+) {
   const limits = getFileLimits(request);
   const multerUpload = multer({
     storage: storage,
@@ -64,4 +68,4 @@ function upload(request: Request, response: Response, next: NextFunction) {
   });
 }
 
-export { upload };
+export { multerUpload };

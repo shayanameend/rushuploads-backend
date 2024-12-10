@@ -8,8 +8,8 @@ import {
   UnauthorizedResponse,
   handleErrors,
 } from "../lib/error";
-import { verifyToken } from "../utils/jwt";
 import { getUserById } from "../services/user";
+import { verifyToken } from "../utils/jwt";
 
 interface VerifyRequestParams {
   role?: Role;
