@@ -26,7 +26,8 @@ model User {
 
   files File[]
 
-  sharedFiles SharedFile[]
+  sharedFileIds String[] @map("shared_file_ids") @db.ObjectId
+  sharedFiles   File[]   @relation("Shared", fields: [sharedFileIds], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -65,20 +66,8 @@ model File {
   userId String @map("user_id") @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])
 
-  sharedFiles SharedFile[]
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
-}
-
-model SharedFile {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  fileId String @map("file_id") @db.ObjectId
-  file   File   @relation(fields: [fileId], references: [id])
-
-  userId String @map("user_id") @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
+  sharedToUserIds String[] @map("shared_to_user_ids") @db.ObjectId
+  sharedToUsers   User[]   @relation("Shared", fields: [sharedToUserIds], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
