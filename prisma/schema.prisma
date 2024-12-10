@@ -51,17 +51,11 @@ model Otp {
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 }
 
-enum FileType {
-  IMAGE
-  VIDEO
-  PDF
-}
-
 model File {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   name String
-  type FileType
+  type String
 
   userId String @map("user_id") @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])

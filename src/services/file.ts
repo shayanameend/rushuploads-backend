@@ -1,4 +1,4 @@
-import type { FileType, Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import { prisma } from "../lib/prisma";
 
@@ -23,7 +23,26 @@ async function createFile(payload: Prisma.FileCreateInput) {
   return { file };
 }
 
-async function getFileById(query: { id: string; type?: FileType }) {
+async function createFiles(payload: {
+  userId: string;
+  rawFiles: Express.Multer.File[];
+}) {
+  const files = await prisma.$transaction(
+    payload.rawFiles.map((file) =>
+      prisma.file.create({
+        data: {
+          name: file.filename,
+          type: file.mimetype,
+          userId: payload.userId,
+        },
+      }),
+    ),
+  );
+
+  return { files };
+}
+
+async function getFileById(query: { id: string; type?: string }) {
   const file = await prisma.file.findUnique({
     where: {
       id: query.id,
@@ -47,7 +66,7 @@ async function getFileById(query: { id: string; type?: FileType }) {
   return { file };
 }
 
-async function getFilesByUserId(query: { userId: string; type?: FileType }) {
+async function getFilesByUserId(query: { userId: string; type?: string }) {
   const files = await prisma.file.findMany({
     where: {
       userId: query.userId,
@@ -73,7 +92,7 @@ async function getFilesByUserId(query: { userId: string; type?: FileType }) {
 
 async function getFilesBySharedUserId(query: {
   userId: string;
-  type?: FileType;
+  type?: string;
 }) {
   const files = await prisma.file.findMany({
     where: {
@@ -103,7 +122,7 @@ async function getFilesBySharedUserId(query: {
 }
 
 async function updateFileById(
-  query: { id: string; type?: FileType },
+  query: { id: string; type?: string },
   payload: Prisma.FileUpdateInput,
 ) {
   const file = await prisma.file.update({
@@ -133,7 +152,7 @@ async function updateFileById(
 async function deleteFileById(query: {
   id: string;
   userId: string;
-  type?: FileType;
+  type?: string;
 }) {
   const file = await prisma.file.delete({
     where: {
@@ -148,6 +167,7 @@ async function deleteFileById(query: {
 
 export {
   createFile,
+  createFiles,
   getFileById,
   getFilesByUserId,
   getFilesBySharedUserId,

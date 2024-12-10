@@ -35,7 +35,7 @@ class NotFoundResponse extends ErrorResponse {
   }
 }
 
-function handleErrors(response: Response, error: Error) {
+function handleErrors(response: Response, error: unknown) {
   if (error instanceof ZodError) {
     response.badRequest(
       {
@@ -116,7 +116,7 @@ function handleErrors(response: Response, error: Error) {
 
   response.internalServerError(
     {
-      error: error,
+      error: JSON.stringify(error),
     },
     {
       message: "Something went wrong!",
