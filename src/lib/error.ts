@@ -115,9 +115,7 @@ function handleErrors(response: Response, error: unknown) {
   }
 
   response.internalServerError(
-    {
-      error: JSON.stringify(error),
-    },
+    {},
     {
       message: "Something went wrong!",
     },
