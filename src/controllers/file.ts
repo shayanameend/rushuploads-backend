@@ -5,7 +5,7 @@ import { createFiles } from "../services/file";
 
 async function uploadFiles(request: Request, response: Response) {
   try {
-    const rawFiles = request.files as Express.Multer.File[];
+    const rawFiles = (request.files as Express.Multer.File[]) ?? [];
 
     if (rawFiles.length < 1) {
       throw new BadResponse("No files uploaded!");
@@ -23,7 +23,9 @@ async function uploadFiles(request: Request, response: Response) {
       { message: "Files uploaded successfully!" },
     );
   } catch (error) {
-    handleErrors(error, response);
+    handleErrors({ response, error });
+
+    return;
   }
 }
 

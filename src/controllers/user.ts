@@ -44,7 +44,7 @@ async function getAllUsers(request: Request, response: Response) {
       { message: "Users fetched successfully!" },
     );
   } catch (error) {
-    handleErrors(response, error);
+    handleErrors({ response, error });
 
     return;
   }
@@ -67,7 +67,7 @@ async function getOneUser(request: Request, response: Response) {
       { message: "User fetched successfully!" },
     );
   } catch (error) {
-    handleErrors(response, error);
+    handleErrors({ response, error });
 
     return;
   }
@@ -98,7 +98,7 @@ async function updateOneUser(request: Request, response: Response) {
       { message: "User updated successfully!" },
     );
   } catch (error) {
-    handleErrors(response, error);
+    handleErrors({ response, error });
 
     return;
   }
@@ -123,7 +123,7 @@ async function deleteOneUser(request: Request, response: Response) {
       { message: "User deleted successfully!" },
     );
   } catch (error) {
-    handleErrors(response, error);
+    handleErrors({ response, error });
 
     return;
   }

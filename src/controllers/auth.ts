@@ -75,7 +75,7 @@ async function signUp(request: Request, response: Response) {
 
     return;
   } catch (error) {
-    handleErrors(response, error);
+    handleErrors({ response, error });
 
     return;
   }
@@ -173,7 +173,7 @@ async function signIn(request: Request, response: Response) {
 
     return;
   } catch (error) {
-    handleErrors(response, error);
+    handleErrors({ response, error });
 
     return;
   }
@@ -223,7 +223,7 @@ async function verifyOtp(request: Request, response: Response) {
 
     return;
   } catch (error) {
-    handleErrors(response, error);
+    handleErrors({ response, error });
 
     return;
   }

@@ -49,7 +49,7 @@ function verifyRequest({ role, isVerified }: Readonly<VerifyRequestParams>) {
 
       next();
     } catch (error) {
-      handleErrors(response, error);
+      handleErrors({ response, error });
 
       return;
     }
