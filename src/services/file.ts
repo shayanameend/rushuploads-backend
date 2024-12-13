@@ -31,6 +31,7 @@ async function createFiles(payload: {
     payload.rawFiles.map((file) =>
       prisma.file.create({
         data: {
+          originalName: file.originalname,
           name: file.filename,
           type: file.mimetype,
           userId: payload.userId,

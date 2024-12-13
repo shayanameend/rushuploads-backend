@@ -54,8 +54,9 @@ model Otp {
 model File {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name String
-  type String
+  originalName String @map("original_name")
+  name         String
+  type         String
 
   userId String @map("user_id") @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])
