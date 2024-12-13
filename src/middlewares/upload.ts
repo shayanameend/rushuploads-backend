@@ -11,12 +11,12 @@ const allowedTypesForFree = /jpeg|jpg|png|mp4|pdf/;
 const allowedTypesForPremium = /jpeg|jpg|png|mp4|pdf|zip|rar/;
 
 const allowedLimitsForFree = {
-  fileSize: 1024 * 1024 * 5,
+  fileSize: 1024 * 1024 * 10,
   files: 1,
 };
 
 const allowedLimitsForPremium = {
-  fileSize: 1024 * 1024 * 25,
+  fileSize: 1024 * 1024 * 50,
   files: 5,
 };
 
