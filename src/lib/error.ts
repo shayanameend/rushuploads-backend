@@ -43,7 +43,7 @@ function handleErrors({
     response.badRequest(
       {},
       {
-        message: error.message,
+        message: error.issues.map((issue) => issue.message).join(", "),
       },
     );
 
