@@ -8,6 +8,7 @@ import { verifyRequest } from "./middlewares/auth";
 import { expandResponse } from "./middlewares/response";
 import { authRouter } from "./routers/auth";
 import { fileRouter } from "./routers/file";
+import { linkRouter } from "./routers/link";
 import { userRouter } from "./routers/user";
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(expandResponse);
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
 app.use("/files", fileRouter);
+app.use("/links", linkRouter);
 
 app.get("/test", verifyRequest({ isVerified: true }), (_request, response) => {
   response.success({}, { message: "Test route!" });

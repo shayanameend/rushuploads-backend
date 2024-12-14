@@ -7,16 +7,15 @@ async function createFile(payload: Prisma.FileCreateInput) {
     data: payload,
     select: {
       id: true,
+      originalName: true,
       name: true,
       type: true,
+      updatedAt: true,
       user: {
         select: {
-          id: true,
           email: true,
         },
       },
-      createdAt: true,
-      updatedAt: true,
     },
   });
 
@@ -38,16 +37,15 @@ async function createFiles(payload: {
         },
         select: {
           id: true,
+          originalName: true,
           name: true,
           type: true,
+          updatedAt: true,
           user: {
             select: {
-              id: true,
               email: true,
             },
           },
-          createdAt: true,
-          updatedAt: true,
         },
       }),
     ),
@@ -64,16 +62,15 @@ async function getFileById(query: { id: string; type?: string }) {
     },
     select: {
       id: true,
+      originalName: true,
       name: true,
       type: true,
+      updatedAt: true,
       user: {
         select: {
-          id: true,
           email: true,
         },
       },
-      createdAt: true,
-      updatedAt: true,
     },
   });
 
@@ -88,16 +85,15 @@ async function getFilesByUserId(query: { userId: string; type?: string }) {
     },
     select: {
       id: true,
+      originalName: true,
       name: true,
       type: true,
+      updatedAt: true,
       user: {
         select: {
-          id: true,
           email: true,
         },
       },
-      createdAt: true,
-      updatedAt: true,
     },
   });
 
@@ -119,16 +115,15 @@ async function getFilesBySharedUserId(query: {
     },
     select: {
       id: true,
+      originalName: true,
       name: true,
       type: true,
+      updatedAt: true,
       user: {
         select: {
-          id: true,
           email: true,
         },
       },
-      createdAt: true,
-      updatedAt: true,
     },
   });
 
@@ -147,16 +142,15 @@ async function updateFileById(
     data: payload,
     select: {
       id: true,
+      originalName: true,
       name: true,
       type: true,
+      updatedAt: true,
       user: {
         select: {
-          id: true,
           email: true,
         },
       },
-      createdAt: true,
-      updatedAt: true,
     },
   });
 
@@ -176,16 +170,15 @@ async function deleteFileById(query: {
     },
     select: {
       id: true,
+      originalName: true,
       name: true,
       type: true,
+      updatedAt: true,
       user: {
         select: {
-          id: true,
           email: true,
         },
       },
-      createdAt: true,
-      updatedAt: true,
     },
   });
 

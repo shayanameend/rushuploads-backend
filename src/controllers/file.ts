@@ -23,9 +23,7 @@ async function uploadFiles(request: Request, response: Response) {
       { message: "Files uploaded successfully!" },
     );
   } catch (error) {
-    handleErrors({ response, error });
-
-    return;
+    return handleErrors({ response, error });
   }
 }
 
