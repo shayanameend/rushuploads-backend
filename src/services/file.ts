@@ -23,8 +23,8 @@ async function createFile(payload: Prisma.FileCreateInput) {
 }
 
 async function createFiles(payload: {
-  userId: string;
   rawFiles: Express.Multer.File[];
+  userId: string;
 }) {
   const files = await prisma.$transaction(
     payload.rawFiles.map((file) =>
@@ -33,7 +33,11 @@ async function createFiles(payload: {
           originalName: file.originalname,
           name: file.filename,
           type: file.mimetype,
-          userId: payload.userId,
+          user: {
+            connect: {
+              id: payload.userId,
+            },
+          },
         },
         select: {
           id: true,

@@ -10,8 +10,14 @@ async function createLink(payload: {
     data: {
       title: payload.title,
       message: payload.message,
-      fileIds: payload.fileIds,
-      userId: payload.userId,
+      files: {
+        connect: payload.fileIds.map((id) => ({ id })),
+      },
+      user: {
+        connect: {
+          id: payload.userId,
+        },
+      },
     },
     select: {
       id: true,
