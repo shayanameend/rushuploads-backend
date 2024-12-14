@@ -1,7 +1,7 @@
 import { prisma } from "../lib/prisma";
 
 async function createMail(payload: {
-  receiverEmails: string[];
+  to: string[];
   title?: string;
   message?: string;
   fileIds: string[];
@@ -9,7 +9,7 @@ async function createMail(payload: {
 }) {
   const mail = await prisma.mail.create({
     data: {
-      receiverEmails: payload.receiverEmails,
+      to: payload.to,
       title: payload.title,
       message: payload.message,
       files: {
@@ -23,7 +23,7 @@ async function createMail(payload: {
     },
     select: {
       id: true,
-      receiverEmails: true,
+      to: true,
       title: true,
       message: true,
       updatedAt: true,

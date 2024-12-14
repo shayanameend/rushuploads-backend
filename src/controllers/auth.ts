@@ -7,7 +7,7 @@ import { BadResponse, NotFoundResponse, handleErrors } from "../lib/error";
 import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
 import { createUser, getUserByEmail, updateUserById } from "../services/user";
 import { signToken } from "../utils/jwt";
-import { sendMail } from "../utils/mail";
+import { sendOTP } from "../utils/mail";
 import {
   signInSchema,
   signUpSchema,
@@ -56,10 +56,10 @@ async function signUp(request: Request, response: Response) {
       { otpType: OtpType.VERIFY_EMAIL },
     );
 
-    await sendMail({
+    await sendOTP({
       to: user.email,
       subject: "Verify Email",
-      body: `Your otp is: ${otp.code}`,
+      code: `Your otp is: ${otp.code}`,
     });
 
     user.password = undefined;
@@ -108,10 +108,10 @@ async function signIn(request: Request, response: Response) {
         { otpType: OtpType.VERIFY_EMAIL },
       );
 
-      await sendMail({
+      await sendOTP({
         to: user.email,
         subject: "Verify Email",
-        body: `Your otp is: ${otp.code}`,
+        code: `Your otp is: ${otp.code}`,
       });
 
       user.password = undefined;
@@ -140,10 +140,10 @@ async function signIn(request: Request, response: Response) {
         { otpType: OtpType.VERIFY_EMAIL },
       );
 
-      await sendMail({
+      await sendOTP({
         to: user.email,
         subject: "Verify Email",
-        body: `Your otp is: ${otp.code}`,
+        code: `Your otp is: ${otp.code}`,
       });
 
       user.password = undefined;

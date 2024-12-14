@@ -1,7 +1,7 @@
 import * as zod from "zod";
 
 const sendMailBodySchema = zod.object({
-  receiverEmails: zod
+  to: zod
     .array(
       zod
         .string({
