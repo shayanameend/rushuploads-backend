@@ -8,7 +8,7 @@ async function uploadFiles(request: Request, response: Response) {
     const rawFiles = (request.files as Express.Multer.File[]) ?? [];
 
     if (rawFiles.length < 1) {
-      throw new BadResponse("No files uploaded!");
+      throw new BadResponse("No Files Uploaded!");
     }
 
     const { files } = await createFiles({
@@ -20,7 +20,7 @@ async function uploadFiles(request: Request, response: Response) {
       {
         data: { files },
       },
-      { message: "Files uploaded successfully!" },
+      { message: "Files Uploaded Successfully!" },
     );
   } catch (error) {
     return handleErrors({ response, error });

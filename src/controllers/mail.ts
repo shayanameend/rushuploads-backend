@@ -30,7 +30,7 @@ async function sendMail(request: Request, response: Response) {
       {
         data: { mail },
       },
-      { message: "Mail send successfully!" },
+      { message: "Mail Send Successfully!" },
     );
   } catch (error) {
     return handleErrors({ response, error });

@@ -41,7 +41,7 @@ async function getAllUsers(request: Request, response: Response) {
       {
         data: { users },
       },
-      { message: "Users fetched successfully!" },
+      { message: "Users Fetched Successfully!" },
     );
   } catch (error) {
     handleErrors({ response, error });
@@ -57,14 +57,14 @@ async function getOneUser(request: Request, response: Response) {
     const user = await getUserById({ id: userId });
 
     if (!user) {
-      throw new BadResponse("User not found!");
+      throw new BadResponse("User Not Found!");
     }
 
     response.success(
       {
         data: { user },
       },
-      { message: "User fetched successfully!" },
+      { message: "User Fetched Successfully!" },
     );
   } catch (error) {
     handleErrors({ response, error });
@@ -83,7 +83,7 @@ async function updateOneUser(request: Request, response: Response) {
     const user = await getUserById({ id: userId });
 
     if (!user) {
-      throw new BadResponse("User not found!");
+      throw new BadResponse("User Not Found!");
     }
 
     const { user: updatedUser } = await updateUserById(
@@ -95,7 +95,7 @@ async function updateOneUser(request: Request, response: Response) {
       {
         data: { user: updatedUser },
       },
-      { message: "User updated successfully!" },
+      { message: "User Updated Successfully!" },
     );
   } catch (error) {
     handleErrors({ response, error });
@@ -111,7 +111,7 @@ async function deleteOneUser(request: Request, response: Response) {
     const user = await getUserById({ id: userId });
 
     if (!user) {
-      throw new BadResponse("User not found!");
+      throw new BadResponse("User Not Found!");
     }
 
     const { user: deletedUser } = await deleteUserById({ id: userId });
@@ -120,7 +120,7 @@ async function deleteOneUser(request: Request, response: Response) {
       {
         data: { user: deletedUser },
       },
-      { message: "User deleted successfully!" },
+      { message: "User Deleted Successfully!" },
     );
   } catch (error) {
     handleErrors({ response, error });

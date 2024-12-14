@@ -21,7 +21,7 @@ async function generateLink(request: Request, response: Response) {
       {
         data: { link },
       },
-      { message: "Link created successfully!" },
+      { message: "Link Created Successfully!" },
     );
   } catch (error) {
     return handleErrors({ response, error });

@@ -20,8 +20,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(expandResponse);
 
-app.use("/uploads", express.static("uploads"));
-
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
 app.use("/files", fileRouter);
@@ -30,6 +28,12 @@ app.use("/mails", mailRouter);
 
 app.get("/test", verifyRequest({ isVerified: true }), (_request, response) => {
   response.success({}, { message: "Test route!" });
+});
+
+app.use("/uploads", express.static("uploads"));
+
+app.all("/uploads/*", (_request, response) => {
+  response.notFound({}, { message: "Expired!" });
 });
 
 app.all("*", (_request, response) => {

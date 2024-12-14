@@ -37,7 +37,7 @@ async function signUp(request: Request, response: Response) {
     });
 
     if (!user) {
-      throw new NotFoundResponse("User not found!");
+      throw new NotFoundResponse("User Not Found!");
     }
 
     user.isVerified = user.password ? user.isVerified : false;
@@ -58,8 +58,7 @@ async function signUp(request: Request, response: Response) {
 
     await sendOTP({
       to: user.email,
-      subject: "Verify Email",
-      code: `Your otp is: ${otp.code}`,
+      code: otp.code,
     });
 
     user.password = undefined;
@@ -110,8 +109,7 @@ async function signIn(request: Request, response: Response) {
 
       await sendOTP({
         to: user.email,
-        subject: "Verify Email",
-        code: `Your otp is: ${otp.code}`,
+        code: otp.code,
       });
 
       user.password = undefined;
@@ -142,8 +140,7 @@ async function signIn(request: Request, response: Response) {
 
       await sendOTP({
         to: user.email,
-        subject: "Verify Email",
-        code: `Your otp is: ${otp.code}`,
+        code: otp.code,
       });
 
       user.password = undefined;
