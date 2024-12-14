@@ -1,4 +1,5 @@
 import type { Response } from "express";
+
 import { ZodError } from "zod";
 
 class ErrorResponse extends Error {
@@ -43,7 +44,7 @@ function handleErrors({
     response.badRequest(
       {},
       {
-        message: error.issues.map((issue) => issue.message).join(", "),
+        message: "Invalid Data!",
       },
     );
 

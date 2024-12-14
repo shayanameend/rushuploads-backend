@@ -7,7 +7,7 @@ import { verifyRequest } from "../middlewares/auth";
 const linkRouter = Router();
 
 linkRouter.post(
-  "/",
+  "/generate",
   verifyRequest({ isVerified: true, role: Role.USER }),
   generateLink,
 );
