@@ -36,6 +36,19 @@ async function createFiles(payload: {
           type: file.mimetype,
           userId: payload.userId,
         },
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          user: {
+            select: {
+              id: true,
+              email: true,
+            },
+          },
+          createdAt: true,
+          updatedAt: true,
+        },
       }),
     ),
   );
@@ -160,6 +173,19 @@ async function deleteFileById(query: {
       id: query.id,
       type: query.type,
       userId: query.userId,
+    },
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+      createdAt: true,
+      updatedAt: true,
     },
   });
 
