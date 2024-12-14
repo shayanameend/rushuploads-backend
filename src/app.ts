@@ -30,14 +30,10 @@ app.use("/mails", mailRouter);
 
 app.get("/test", verifyRequest({ isVerified: true }), (_request, response) => {
   response.success({}, { message: "Test route!" });
-
-  return;
 });
 
 app.all("*", (_request, response) => {
   response.notFound({}, { message: "Not Found!" });
-
-  return;
 });
 
 app.use(
@@ -50,8 +46,6 @@ app.use(
     console.error(error);
 
     response.internalServerError({}, { message: "Internal Server Error!" });
-
-    return;
   },
 );
 

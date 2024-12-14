@@ -23,6 +23,7 @@ async function createMail(payload: {
     },
     select: {
       id: true,
+      receiverEmails: true,
       title: true,
       message: true,
       updatedAt: true,
