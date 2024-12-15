@@ -8,7 +8,10 @@ interface SendOTPOptions {
 async function sendOTP({ to, code }: Readonly<SendOTPOptions>) {
   nodemailerTransporter.sendMail(
     {
-      from: process.env.MAIL_FROM,
+      from: {
+        name: "Rush Uploads",
+        address: "support@rushuploads.com",
+      },
       to,
       subject: "Verify Your Email",
       text: `Your OTP Code is: ${code}`,
@@ -40,7 +43,10 @@ async function sendFiles({
 }: Readonly<SendFilesOptions>) {
   nodemailerTransporter.sendMail(
     {
-      from: process.env.MAIL_FROM,
+      from: {
+        name: "Rush Uploads",
+        address: "support@rushuploads.com",
+      },
       to,
       subject: title,
       text: message,

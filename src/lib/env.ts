@@ -7,6 +7,8 @@ const envSchema = zod.object({
   PORT: zod.string().length(4),
   JWT_SECRET: zod.string(),
   JWT_EXPIRY: zod.string(),
+  NODEMAILER_EMAIL: zod.string().email(),
+  NODEMAILER_PASSWORD: zod.string(),
   DATABASE_URL: zod.string().url(),
 });
 
