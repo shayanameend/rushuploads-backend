@@ -52,6 +52,8 @@ async function createFiles(payload: {
           originalName: true,
           name: true,
           type: true,
+          isExpired: true,
+          expiredAt: true,
           updatedAt: true,
           user: {
             select: {

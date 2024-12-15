@@ -34,6 +34,8 @@ async function createMail(payload: {
           originalName: true,
           name: true,
           type: true,
+          isExpired: true,
+          expiredAt: true,
           updatedAt: true,
         },
       },
