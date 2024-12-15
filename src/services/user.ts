@@ -1,7 +1,7 @@
 import { type Prisma, Role } from "@prisma/client";
 
-import { env } from "../lib/env";
 import { prisma } from "../lib/prisma";
+import { TierConstraints } from "../constants/tiers";
 
 async function createUser(payload: {
   email: string;
@@ -13,7 +13,7 @@ async function createUser(payload: {
       email: payload.email,
       password: payload.password,
       role: payload.role,
-      remainingStorage: env.FREE_TIER_SIZE_LIMIT_MB,
+      remainingStorage: TierConstraints.FREE.maxStorage,
     },
     select: {
       id: true,
