@@ -12,12 +12,19 @@ enum Role {
   ADMIN
 }
 
+enum Tier {
+  FREE
+  PRO
+  PREMIUM
+}
+
 model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   email      String  @unique
   password   String?
   role       Role    @default(USER)
+  tier       Tier    @default(FREE)
   isVerified Boolean @default(false) @map("is_verified")
   isDeleted  Boolean @default(false) @map("is_deleted")
 
