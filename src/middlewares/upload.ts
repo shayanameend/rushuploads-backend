@@ -79,6 +79,7 @@ async function s3Upload(
           Bucket: env.AWS_BUCKET,
           Key: file.filename,
           Body: file.buffer,
+          ContentType: file.mimetype,
         });
 
         return s3Client.send(command);
