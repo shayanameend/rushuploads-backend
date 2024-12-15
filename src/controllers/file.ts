@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import type { Tier } from "@prisma/client";
 
 import { TierConstraints } from "../constants/tiers";
+import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
 import { createFiles, uploadFiles } from "../services/file";
 import { createLink } from "../services/link";
@@ -30,12 +31,12 @@ async function generateFileLink(request: Request, response: Response) {
     const userTier = request.user.tier;
     const expiresInMs = expiresInDays * 24 * 60 * 60 * 1000;
 
-    validateFileConstraints(
+    validateFileConstraints({
       userTier,
       totalFileSize,
       expiresInMs,
-      request.user.remainingStorage,
-    );
+      remainingStorage: request.user.remainingStorage,
+    });
 
     const expiresAt = new Date(Date.now() + expiresInMs);
 
@@ -93,12 +94,12 @@ async function sendFileMail(request: Request, response: Response) {
     const userTier = request.user.tier;
     const expiresInMs = expiresInDays * 24 * 60 * 60 * 1000;
 
-    validateFileConstraints(
+    validateFileConstraints({
       userTier,
       totalFileSize,
       expiresInMs,
-      request.user.remainingStorage,
-    );
+      remainingStorage: request.user.remainingStorage,
+    });
 
     const expiresAt = new Date(Date.now() + expiresInMs);
 
@@ -131,7 +132,7 @@ async function sendFileMail(request: Request, response: Response) {
       message: mail.message,
       files: mail.files.map((file, index) => ({
         ...file,
-        buffer: rawFiles[index].buffer,
+        url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
       })),
     });
 
@@ -148,12 +149,17 @@ async function sendFileMail(request: Request, response: Response) {
 
 export { generateFileLink, sendFileMail };
 
-function validateFileConstraints(
-  userTier: Tier,
-  totalFileSize: number,
-  expiresInMs: number,
-  remainingStorage: number,
-) {
+function validateFileConstraints({
+  userTier,
+  totalFileSize,
+  expiresInMs,
+  remainingStorage,
+}: {
+  userTier: Tier;
+  totalFileSize: number;
+  expiresInMs: number;
+  remainingStorage: number;
+}) {
   const tierConstraints = TierConstraints[userTier];
 
   if (totalFileSize > tierConstraints.maxSendSize) {
