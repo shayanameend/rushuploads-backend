@@ -11,7 +11,7 @@ const envSchema = zod.object({
   NODEMAILER_PASSWORD: zod.string(),
   DATABASE_URL: zod.string().url(),
   AWS_ACCESS_KEY_ID: zod.string(),
-  AWS_ACCESS_KEY_SECRET: zod.string(),
+  AWS_SECRET_ACCESS_KEY: zod.string(),
 });
 
 export const env = envSchema.parse(process.env);
