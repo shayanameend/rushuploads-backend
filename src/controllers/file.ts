@@ -40,27 +40,36 @@ async function generateFileLink(request: Request, response: Response) {
 
     const expiresAt = new Date(Date.now() + expiresInMs);
 
-    await uploadFiles({ rawFiles });
+    const [_p1, p2, _p3] = await Promise.all([
+      uploadFiles({ rawFiles }),
 
-    const { files } = await createFiles({
-      userId: request.user.id,
-      expiresAt,
-      rawFiles,
-    });
+      createFiles({
+        userId: request.user.id,
+        expiresAt,
+        rawFiles,
+      }),
 
-    await updateUserById(
-      { id: request.user.id },
-      {
-        remainingStorage: request.user.remainingStorage - totalFileSize,
-      },
-    );
+      updateUserById(
+        { id: request.user.id },
+        {
+          remainingStorage: request.user.remainingStorage - totalFileSize,
+        },
+      ),
+    ]);
 
     const { link } = await createLink({
       title,
       message,
-      fileIds: files.map((file) => file.id),
+      fileIds: p2.files.map((file) => file.id),
       userId: request.user.id,
     });
+
+    const augmentedFiles = link.files.map((file) => ({
+      ...file,
+      url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
+    }));
+
+    link.files = augmentedFiles;
 
     response.created(
       {
@@ -103,38 +112,44 @@ async function sendFileMail(request: Request, response: Response) {
 
     const expiresAt = new Date(Date.now() + expiresInMs);
 
-    await uploadFiles({ rawFiles });
+    const [_p1, p2, _p3] = await Promise.all([
+      uploadFiles({ rawFiles }),
 
-    const { files } = await createFiles({
-      userId: request.user.id,
-      expiresAt,
-      rawFiles,
-    });
+      createFiles({
+        userId: request.user.id,
+        expiresAt,
+        rawFiles,
+      }),
 
-    await updateUserById(
-      { id: request.user.id },
-      {
-        remainingStorage: request.user.remainingStorage - totalFileSize,
-      },
-    );
+      updateUserById(
+        { id: request.user.id },
+        {
+          remainingStorage: request.user.remainingStorage - totalFileSize,
+        },
+      ),
+    ]);
 
     const { mail } = await createMail({
       to,
       title,
       message,
-      fileIds: files.map((file) => file.id),
+      fileIds: p2.files.map((file) => file.id),
       userId: request.user.id,
     });
+
+    const augmentedFiles = mail.files.map((file) => ({
+      ...file,
+      url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
+    }));
 
     sendFiles({
       to: mail.to.join(", "),
       title: mail.title,
       message: mail.message,
-      files: mail.files.map((file, index) => ({
-        ...file,
-        url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
-      })),
+      files: augmentedFiles,
     });
+
+    mail.files = augmentedFiles;
 
     response.created(
       {
