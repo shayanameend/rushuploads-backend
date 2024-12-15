@@ -14,12 +14,6 @@ const envSchema = zod.object({
   AWS_SECRET_ACCESS_KEY: zod.string(),
   AWS_BUCKET: zod.string(),
   AWS_REGION: zod.string(),
-  FREE_TIER_SIZE_LIMIT_MB: zod.coerce.number(),
-  PRO_TIER_SIZE_LIMIT_MB: zod.coerce.number(),
-  PREMIUM_TIER_SIZE_LIMIT_MB: zod.coerce.number(),
-  FREE_TIER_EXPIRY_LIMIT_DAYS: zod.coerce.number(),
-  PRO_TIER_EXPIRY_LIMIT_DAYS: zod.coerce.number(),
-  PREMIUM_TIER_EXPIRY_LIMIT_DAYS: zod.coerce.number(),
 });
 
 export const env = envSchema.parse(process.env);
