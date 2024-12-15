@@ -40,7 +40,7 @@ const sendFileMailBodySchema = zod.object({
       message: "Message must be a string!",
     })
     .optional(),
-  expiressInDays: zod.coerce.number({
+  expiresInDays: zod.coerce.number({
     message: "Expires In Days must be a number!",
   }),
 });

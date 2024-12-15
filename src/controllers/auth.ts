@@ -4,10 +4,10 @@ import { OtpType } from "@prisma/client";
 import argon from "argon2";
 
 import { BadResponse, NotFoundResponse, handleErrors } from "../lib/error";
-import { signToken } from "../services/jwt";
 import { sendOTP } from "../services/mail";
 import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
 import { createUser, getUserByEmail, updateUserById } from "../services/user";
+import { signToken } from "../utils/jwt";
 import {
   signInSchema,
   signUpSchema,

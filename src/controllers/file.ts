@@ -1,15 +1,17 @@
 import type { Request, Response } from "express";
 
+import type { Tier } from "@prisma/client";
+
+import { TierConstraints } from "../constants/tiers";
 import { BadResponse, handleErrors } from "../lib/error";
 import { createFiles, uploadFiles } from "../services/file";
 import { createLink } from "../services/link";
 import { createMail, sendFiles } from "../services/mail";
+import { updateUserById } from "../services/user";
 import {
   generateFileLinkBodySchema,
   sendFileMailBodySchema,
 } from "../validators/file";
-import { TierConstraints } from "../constants/tiers";
-import { updateUserById } from "../services/user";
 
 async function generateFileLink(request: Request, response: Response) {
   try {
@@ -26,37 +28,14 @@ async function generateFileLink(request: Request, response: Response) {
     const totalFileSize = rawFiles.reduce((acc, file) => acc + file.size, 0);
 
     const userTier = request.user.tier;
-    const tierConstraints = TierConstraints[userTier];
-
-    if (totalFileSize > tierConstraints.maxSendSize) {
-      throw new BadResponse(
-        `File size limit exceeded! Max allowed is ${
-          tierConstraints.maxSendSize / (1024 * 1024 * 1024)
-        } GB for your tier.`,
-      );
-    }
-
-    if (request.user.remainingStorage < totalFileSize) {
-      throw new BadResponse(
-        `Not enough storage! You have ${
-          request.user.remainingStorage / (1024 * 1024 * 1024)
-        } GB remaining.`,
-      );
-    }
-
     const expiresInMs = expiresInDays * 24 * 60 * 60 * 1000;
-    if (
-      expiresInMs < tierConstraints.minExpiry ||
-      expiresInMs > tierConstraints.maxExpiry
-    ) {
-      throw new BadResponse(
-        `Expiry must be between ${
-          tierConstraints.minExpiry / (24 * 60 * 60 * 1000)
-        } and ${
-          tierConstraints.maxExpiry / (24 * 60 * 60 * 1000)
-        } days for your tier.`,
-      );
-    }
+
+    validateFileConstraints(
+      userTier,
+      totalFileSize,
+      expiresInMs,
+      request.user.remainingStorage,
+    );
 
     const expiresAt = new Date(Date.now() + expiresInMs);
 
@@ -95,7 +74,7 @@ async function generateFileLink(request: Request, response: Response) {
 
 async function sendFileMail(request: Request, response: Response) {
   try {
-    const { to, title, message, expiressInDays } = sendFileMailBodySchema.parse(
+    const { to, title, message, expiresInDays } = sendFileMailBodySchema.parse(
       request.body,
     );
 
@@ -108,38 +87,14 @@ async function sendFileMail(request: Request, response: Response) {
     const totalFileSize = rawFiles.reduce((acc, file) => acc + file.size, 0);
 
     const userTier = request.user.tier;
-    const tierConstraints = TierConstraints[userTier];
+    const expiresInMs = expiresInDays * 24 * 60 * 60 * 1000;
 
-    if (totalFileSize > tierConstraints.maxSendSize) {
-      throw new BadResponse(
-        `File size limit exceeded! Max allowed is ${
-          tierConstraints.maxSendSize / (1024 * 1024 * 1024)
-        } GB for your tier.`,
-      );
-    }
-
-    if (request.user.remainingStorage < totalFileSize) {
-      throw new BadResponse(
-        `Not enough storage! You have ${
-          request.user.remainingStorage / (1024 * 1024 * 1024)
-        } GB remaining.`,
-      );
-    }
-
-    const expiresInMs = expiressInDays * 24 * 60 * 60 * 1000;
-
-    if (
-      expiresInMs < tierConstraints.minExpiry ||
-      expiresInMs > tierConstraints.maxExpiry
-    ) {
-      throw new BadResponse(
-        `Expiry must be between ${
-          tierConstraints.minExpiry / (24 * 60 * 60 * 1000)
-        } and ${
-          tierConstraints.maxExpiry / (24 * 60 * 60 * 1000)
-        } days for your tier.`,
-      );
-    }
+    validateFileConstraints(
+      userTier,
+      totalFileSize,
+      expiresInMs,
+      request.user.remainingStorage,
+    );
 
     const expiresAt = new Date(Date.now() + expiresInMs);
 
@@ -177,7 +132,7 @@ async function sendFileMail(request: Request, response: Response) {
       {
         data: { mail },
       },
-      { message: "Mail Send Successfully!" },
+      { message: "Mail Sent Successfully!" },
     );
   } catch (error) {
     return handleErrors({ response, error });
@@ -185,3 +140,41 @@ async function sendFileMail(request: Request, response: Response) {
 }
 
 export { generateFileLink, sendFileMail };
+
+function validateFileConstraints(
+  userTier: Tier,
+  totalFileSize: number,
+  expiresInMs: number,
+  remainingStorage: number,
+) {
+  const tierConstraints = TierConstraints[userTier];
+
+  if (totalFileSize > tierConstraints.maxSendSize) {
+    throw new BadResponse(
+      `File size limit exceeded! Max allowed is ${
+        tierConstraints.maxSendSize / (1024 * 1024 * 1024)
+      } GB for your tier.`,
+    );
+  }
+
+  if (remainingStorage < totalFileSize) {
+    throw new BadResponse(
+      `Not enough storage! You have ${
+        remainingStorage / (1024 * 1024 * 1024)
+      } GB remaining.`,
+    );
+  }
+
+  if (
+    expiresInMs < tierConstraints.minExpiry ||
+    expiresInMs > tierConstraints.maxExpiry
+  ) {
+    throw new BadResponse(
+      `Expiry must be between ${
+        tierConstraints.minExpiry / (24 * 60 * 60 * 1000)
+      } and ${
+        tierConstraints.maxExpiry / (24 * 60 * 60 * 1000)
+      } days for your tier.`,
+    );
+  }
+}

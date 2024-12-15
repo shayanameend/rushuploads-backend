@@ -1,7 +1,7 @@
 import { type Prisma, Role } from "@prisma/client";
 
-import { prisma } from "../lib/prisma";
 import { TierConstraints } from "../constants/tiers";
+import { prisma } from "../lib/prisma";
 
 async function createUser(payload: {
   email: string;
