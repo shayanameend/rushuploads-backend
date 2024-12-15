@@ -30,6 +30,7 @@ async function uploadFiles(payload: {
 
 async function createFiles(payload: {
   userId: string;
+  expiresAt: Date;
   rawFiles: Express.Multer.File[];
 }) {
   const files = await prisma.$transaction(
@@ -39,6 +40,7 @@ async function createFiles(payload: {
           originalName: file.originalname,
           name: file.filename,
           type: file.mimetype,
+          expiredAt: payload.expiresAt,
           user: {
             connect: {
               id: payload.userId,

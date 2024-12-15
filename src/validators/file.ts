@@ -11,6 +11,9 @@ const generateFileLinkBodySchema = zod.object({
       message: "Message must be a string!",
     })
     .optional(),
+  expiresInDays: zod.coerce.number({
+    message: "Expires In Days must be a number!",
+  }),
 });
 
 const sendFileMailBodySchema = zod.object({
@@ -37,6 +40,9 @@ const sendFileMailBodySchema = zod.object({
       message: "Message must be a string!",
     })
     .optional(),
+  expiressInDays: zod.coerce.number({
+    message: "Expires In Days must be a number!",
+  }),
 });
 
 export { generateFileLinkBodySchema, sendFileMailBodySchema };

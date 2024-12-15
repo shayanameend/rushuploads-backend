@@ -8,10 +8,14 @@ import {
   generateFileLinkBodySchema,
   sendFileMailBodySchema,
 } from "../validators/file";
+import { TierConstraints } from "../constants/tiers";
+import { updateUserById } from "../services/user";
 
 async function generateFileLink(request: Request, response: Response) {
   try {
-    const { title, message } = generateFileLinkBodySchema.parse(request.body);
+    const { title, message, expiresInDays } = generateFileLinkBodySchema.parse(
+      request.body,
+    );
 
     const rawFiles = (request.files as Express.Multer.File[]) ?? [];
 
@@ -19,12 +23,57 @@ async function generateFileLink(request: Request, response: Response) {
       throw new BadResponse("No Files Uploaded!");
     }
 
+    const totalFileSize = rawFiles.reduce((acc, file) => acc + file.size, 0);
+
+    const userTier = request.user.tier;
+    const tierConstraints = TierConstraints[userTier];
+
+    if (totalFileSize > tierConstraints.maxSendSize) {
+      throw new BadResponse(
+        `File size limit exceeded! Max allowed is ${
+          tierConstraints.maxSendSize / (1024 * 1024 * 1024)
+        } GB for your tier.`,
+      );
+    }
+
+    if (request.user.remainingStorage < totalFileSize) {
+      throw new BadResponse(
+        `Not enough storage! You have ${
+          request.user.remainingStorage / (1024 * 1024 * 1024)
+        } GB remaining.`,
+      );
+    }
+
+    const expiresInMs = expiresInDays * 24 * 60 * 60 * 1000;
+    if (
+      expiresInMs < tierConstraints.minExpiry ||
+      expiresInMs > tierConstraints.maxExpiry
+    ) {
+      throw new BadResponse(
+        `Expiry must be between ${
+          tierConstraints.minExpiry / (24 * 60 * 60 * 1000)
+        } and ${
+          tierConstraints.maxExpiry / (24 * 60 * 60 * 1000)
+        } days for your tier.`,
+      );
+    }
+
+    const expiresAt = new Date(Date.now() + expiresInMs);
+
     await uploadFiles({ rawFiles });
 
     const { files } = await createFiles({
       userId: request.user.id,
-      rawFiles: rawFiles,
+      expiresAt,
+      rawFiles,
     });
+
+    await updateUserById(
+      { id: request.user.id },
+      {
+        remainingStorage: request.user.remainingStorage - totalFileSize,
+      },
+    );
 
     const { link } = await createLink({
       title,
@@ -46,7 +95,9 @@ async function generateFileLink(request: Request, response: Response) {
 
 async function sendFileMail(request: Request, response: Response) {
   try {
-    const { to, title, message } = sendFileMailBodySchema.parse(request.body);
+    const { to, title, message, expiressInDays } = sendFileMailBodySchema.parse(
+      request.body,
+    );
 
     const rawFiles = (request.files as Express.Multer.File[]) ?? [];
 
@@ -54,10 +105,58 @@ async function sendFileMail(request: Request, response: Response) {
       throw new BadResponse("No Files Uploaded!");
     }
 
+    const totalFileSize = rawFiles.reduce((acc, file) => acc + file.size, 0);
+
+    const userTier = request.user.tier;
+    const tierConstraints = TierConstraints[userTier];
+
+    if (totalFileSize > tierConstraints.maxSendSize) {
+      throw new BadResponse(
+        `File size limit exceeded! Max allowed is ${
+          tierConstraints.maxSendSize / (1024 * 1024 * 1024)
+        } GB for your tier.`,
+      );
+    }
+
+    if (request.user.remainingStorage < totalFileSize) {
+      throw new BadResponse(
+        `Not enough storage! You have ${
+          request.user.remainingStorage / (1024 * 1024 * 1024)
+        } GB remaining.`,
+      );
+    }
+
+    const expiresInMs = expiressInDays * 24 * 60 * 60 * 1000;
+
+    if (
+      expiresInMs < tierConstraints.minExpiry ||
+      expiresInMs > tierConstraints.maxExpiry
+    ) {
+      throw new BadResponse(
+        `Expiry must be between ${
+          tierConstraints.minExpiry / (24 * 60 * 60 * 1000)
+        } and ${
+          tierConstraints.maxExpiry / (24 * 60 * 60 * 1000)
+        } days for your tier.`,
+      );
+    }
+
+    const expiresAt = new Date(Date.now() + expiresInMs);
+
+    await uploadFiles({ rawFiles });
+
     const { files } = await createFiles({
       userId: request.user.id,
-      rawFiles: rawFiles,
+      expiresAt,
+      rawFiles,
     });
+
+    await updateUserById(
+      { id: request.user.id },
+      {
+        remainingStorage: request.user.remainingStorage - totalFileSize,
+      },
+    );
 
     const { mail } = await createMail({
       to,
