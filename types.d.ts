@@ -1,4 +1,4 @@
-import type { Role } from "@prisma/client";
+import type { Role, Tier } from "@prisma/client";
 
 export type JSON =
   | number
@@ -26,8 +26,9 @@ declare global {
         id: string;
         email: string;
         role: Role;
+        tier: Tier;
+        remainingStorage: number;
         isVerified: boolean;
-        createdAt: Date;
         updatedAt: Date;
       };
     }

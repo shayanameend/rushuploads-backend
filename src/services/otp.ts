@@ -31,7 +31,6 @@ async function upsertOTP(
       id: true,
       code: true,
       type: true,
-      createdAt: true,
       updatedAt: true,
     },
   });
@@ -49,7 +48,6 @@ async function getOTPByUser(query: { userId: string; type?: OtpType }) {
       id: true,
       code: true,
       type: true,
-      createdAt: true,
       updatedAt: true,
     },
   });
@@ -67,7 +65,6 @@ async function deleteOTPByUser(query: { userId: string; type?: OtpType }) {
       id: true,
       code: true,
       type: true,
-      createdAt: true,
       updatedAt: true,
     },
   });

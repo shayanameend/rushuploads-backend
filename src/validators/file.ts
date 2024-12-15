@@ -1,6 +1,19 @@
 import * as zod from "zod";
 
-const sendMailBodySchema = zod.object({
+const generateFileLinkBodySchema = zod.object({
+  title: zod
+    .string({
+      message: "Title must be a string!",
+    })
+    .optional(),
+  message: zod
+    .string({
+      message: "Message must be a string!",
+    })
+    .optional(),
+});
+
+const sendFileMailBodySchema = zod.object({
   to: zod
     .array(
       zod
@@ -24,15 +37,6 @@ const sendMailBodySchema = zod.object({
       message: "Message must be a string!",
     })
     .optional(),
-  fileIds: zod
-    .array(
-      zod.string({
-        message: "File ID must be a string!",
-      }),
-    )
-    .min(1, {
-      message: "At least 1 File ID is required!",
-    }),
 });
 
-export { sendMailBodySchema };
+export { generateFileLinkBodySchema, sendFileMailBodySchema };

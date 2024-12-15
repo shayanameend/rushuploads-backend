@@ -1,17 +1,24 @@
 import { Role } from "@prisma/client";
 import { Router } from "express";
 
-import { uploadFiles } from "../controllers/file";
+import { generateFileLink, sendFileMail } from "../controllers/file";
 import { verifyRequest } from "../middlewares/auth";
-import { s3Upload } from "../middlewares/upload";
+import { upload } from "../middlewares/upload";
 
 const fileRouter = Router();
 
 fileRouter.post(
-  "/upload",
+  "/link",
   verifyRequest({ isVerified: true, role: Role.USER }),
-  s3Upload,
-  uploadFiles,
+  upload,
+  generateFileLink,
+);
+
+fileRouter.post(
+  "/mail",
+  verifyRequest({ isVerified: true, role: Role.USER }),
+  upload,
+  sendFileMail,
 );
 
 export { fileRouter };

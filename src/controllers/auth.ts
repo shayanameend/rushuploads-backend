@@ -4,10 +4,10 @@ import { OtpType } from "@prisma/client";
 import argon from "argon2";
 
 import { BadResponse, NotFoundResponse, handleErrors } from "../lib/error";
+import { signToken } from "../services/jwt";
+import { sendOTP } from "../services/mail";
 import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
 import { createUser, getUserByEmail, updateUserById } from "../services/user";
-import { signToken } from "../utils/jwt";
-import { sendOTP } from "../utils/mail";
 import {
   signInSchema,
   signUpSchema,
@@ -46,8 +46,9 @@ async function signUp(request: Request, response: Response) {
       id: user.id,
       email: user.email,
       role: user.role,
+      tier: user.tier,
+      remainingStorage: user.remainingStorage,
       isVerified: user.isVerified,
-      createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
 
@@ -63,7 +64,7 @@ async function signUp(request: Request, response: Response) {
 
     user.password = undefined;
 
-    response.success(
+    response.created(
       {
         data: { user, token },
       },
@@ -96,8 +97,9 @@ async function signIn(request: Request, response: Response) {
       id: user.id,
       email: user.email,
       role: user.role,
+      tier: user.tier,
+      remainingStorage: user.remainingStorage,
       isVerified: user.isVerified,
-      createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
 
@@ -188,8 +190,9 @@ async function verifyOtp(request: Request, response: Response) {
       id: user.id,
       email: user.email,
       role: user.role,
+      tier: user.tier,
+      remainingStorage: user.remainingStorage,
       isVerified: user.isVerified,
-      createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
 

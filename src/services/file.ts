@@ -1,30 +1,36 @@
-import type { Prisma } from "@prisma/client";
+import path from "node:path";
 
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { v4 as uuid } from "uuid";
+
+import { env } from "../lib/env";
 import { prisma } from "../lib/prisma";
+import { s3Client } from "../lib/s3";
 
-async function createFile(payload: Prisma.FileCreateInput) {
-  const file = await prisma.file.create({
-    data: payload,
-    select: {
-      id: true,
-      originalName: true,
-      name: true,
-      type: true,
-      updatedAt: true,
-      user: {
-        select: {
-          email: true,
-        },
-      },
-    },
+async function uploadFiles(payload: {
+  rawFiles: Express.Multer.File[];
+}) {
+  const promises = payload.rawFiles.map(async (file) => {
+    file.filename = `${file.fieldname}-${uuid()}${path.extname(
+      file.originalname,
+    )}`;
+
+    const command = new PutObjectCommand({
+      Bucket: env.AWS_BUCKET,
+      Key: file.filename,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    });
+
+    return s3Client.send(command);
   });
 
-  return { file };
+  await Promise.all(promises);
 }
 
 async function createFiles(payload: {
-  rawFiles: Express.Multer.File[];
   userId: string;
+  rawFiles: Express.Multer.File[];
 }) {
   const files = await prisma.$transaction(
     payload.rawFiles.map((file) =>
@@ -58,143 +64,4 @@ async function createFiles(payload: {
   return { files };
 }
 
-async function getFileById(query: { id: string; type?: string }) {
-  const file = await prisma.file.findUnique({
-    where: {
-      id: query.id,
-      type: query.type,
-    },
-    select: {
-      id: true,
-      originalName: true,
-      name: true,
-      type: true,
-      updatedAt: true,
-      user: {
-        select: {
-          email: true,
-        },
-      },
-    },
-  });
-
-  return { file };
-}
-
-async function getFilesByUserId(query: { userId: string; type?: string }) {
-  const files = await prisma.file.findMany({
-    where: {
-      userId: query.userId,
-      type: query.type,
-    },
-    select: {
-      id: true,
-      originalName: true,
-      name: true,
-      type: true,
-      updatedAt: true,
-      user: {
-        select: {
-          email: true,
-        },
-      },
-    },
-  });
-
-  return { files };
-}
-
-async function getFilesBySharedUserId(query: {
-  userId: string;
-  type?: string;
-}) {
-  const files = await prisma.file.findMany({
-    where: {
-      sharedToUsers: {
-        some: {
-          id: query.userId,
-        },
-      },
-      type: query.type,
-    },
-    select: {
-      id: true,
-      originalName: true,
-      name: true,
-      type: true,
-      updatedAt: true,
-      user: {
-        select: {
-          email: true,
-        },
-      },
-    },
-  });
-
-  return { files };
-}
-
-async function updateFileById(
-  query: { id: string; type?: string },
-  payload: Prisma.FileUpdateInput,
-) {
-  const file = await prisma.file.update({
-    where: {
-      id: query.id,
-      type: query.type,
-    },
-    data: payload,
-    select: {
-      id: true,
-      originalName: true,
-      name: true,
-      type: true,
-      updatedAt: true,
-      user: {
-        select: {
-          email: true,
-        },
-      },
-    },
-  });
-
-  return { file };
-}
-
-async function deleteFileById(query: {
-  id: string;
-  userId: string;
-  type?: string;
-}) {
-  const file = await prisma.file.delete({
-    where: {
-      id: query.id,
-      type: query.type,
-      userId: query.userId,
-    },
-    select: {
-      id: true,
-      originalName: true,
-      name: true,
-      type: true,
-      updatedAt: true,
-      user: {
-        select: {
-          email: true,
-        },
-      },
-    },
-  });
-
-  return { file };
-}
-
-export {
-  createFile,
-  createFiles,
-  getFileById,
-  getFilesByUserId,
-  getFilesBySharedUserId,
-  updateFileById,
-  deleteFileById,
-};
+export { uploadFiles, createFiles };

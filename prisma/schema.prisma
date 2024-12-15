@@ -21,12 +21,13 @@ enum Tier {
 model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  email      String  @unique
-  password   String?
-  role       Role    @default(USER)
-  tier       Tier    @default(FREE)
-  isVerified Boolean @default(false) @map("is_verified")
-  isDeleted  Boolean @default(false) @map("is_deleted")
+  email            String  @unique
+  password         String?
+  role             Role    @default(USER)
+  tier             Tier    @default(FREE)
+  remainingStorage Int     @map("remaining_storage")
+  isVerified       Boolean @default(false) @map("is_verified")
+  isDeleted        Boolean @default(false) @map("is_deleted")
 
   otpId String? @map("otp_id") @db.ObjectId
   otp   Otp?
