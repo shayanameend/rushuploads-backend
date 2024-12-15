@@ -12,6 +12,8 @@ const envSchema = zod.object({
   DATABASE_URL: zod.string().url(),
   AWS_ACCESS_KEY_ID: zod.string(),
   AWS_SECRET_ACCESS_KEY: zod.string(),
+  AWS_BUCKET: zod.string(),
+  AWS_REGION: zod.string(),
 });
 
 export const env = envSchema.parse(process.env);

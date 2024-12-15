@@ -2,10 +2,13 @@ import type { NextFunction, Request, Response } from "express";
 
 import path from "node:path";
 
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import multer from "multer";
+import { v4 as uuid } from "uuid";
 
+import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
-import { storage } from "../lib/multer";
+import { s3Client } from "../lib/s3";
 
 const allowedTypesForFree = /jpeg|jpg|png|mp4|pdf/;
 const allowedTypesForPremium = /jpeg|jpg|png|mp4|pdf|zip|rar/;
@@ -20,7 +23,7 @@ const allowedLimitsForPremium = {
   files: 5,
 };
 
-async function localUpload(
+async function s3Upload(
   request: Request,
   response: Response,
   next: NextFunction,
@@ -34,7 +37,7 @@ async function localUpload(
     : allowedLimitsForFree;
 
   const upload = multer({
-    storage,
+    storage: multer.memoryStorage(),
     limits: allowedLimits,
     fileFilter: (_request: Request, file, cb) => {
       try {
@@ -55,7 +58,7 @@ async function localUpload(
     },
   }).array("files");
 
-  upload(request, response, (error: unknown) => {
+  upload(request, response, async (error: unknown) => {
     try {
       if (error) {
         if (error instanceof multer.MulterError) {
@@ -65,6 +68,24 @@ async function localUpload(
         throw error;
       }
 
+      const files = request.files as Express.Multer.File[];
+
+      const promises = files.map(async (file) => {
+        file.filename = `${file.fieldname}-${uuid()}${path.extname(
+          file.originalname,
+        )}`;
+
+        const command = new PutObjectCommand({
+          Bucket: env.AWS_BUCKET,
+          Key: file.filename,
+          Body: file.buffer,
+        });
+
+        return s3Client.send(command);
+      });
+
+      await Promise.all(promises);
+
       next();
     } catch (error) {
       return handleErrors({ response, error });
@@ -72,4 +93,4 @@ async function localUpload(
   });
 }
 
-export { localUpload };
+export { s3Upload };
