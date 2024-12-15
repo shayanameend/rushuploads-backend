@@ -86,7 +86,7 @@ async function sendFiles({
   message: string;
   files: {
     originalName: string;
-    name: string;
+    buffer: Buffer;
     type: string;
   }[];
 }) {
@@ -101,7 +101,7 @@ async function sendFiles({
       text: message,
       attachments: files.map((file) => ({
         filename: file.originalName,
-        path: `http://localhost:8080/uploads/${file.name}`,
+        raw: file.buffer,
         contentType: file.type,
       })),
     },

@@ -74,6 +74,10 @@ async function generateFileLink(request: Request, response: Response) {
 
 async function sendFileMail(request: Request, response: Response) {
   try {
+    request.body.to = request.body.to
+      .split(",")
+      .map((email: string) => email.trim());
+
     const { to, title, message, expiresInDays } = sendFileMailBodySchema.parse(
       request.body,
     );
@@ -123,9 +127,12 @@ async function sendFileMail(request: Request, response: Response) {
 
     sendFiles({
       to: mail.to.join(", "),
-      title,
-      message,
-      files: mail.files,
+      title: mail.title,
+      message: mail.message,
+      files: mail.files.map((file, index) => ({
+        ...file,
+        buffer: rawFiles[index].buffer,
+      })),
     });
 
     response.created(
