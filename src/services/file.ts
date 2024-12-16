@@ -96,4 +96,34 @@ async function getFilesByUserId(query: {
   return { files };
 }
 
-export { uploadFiles, createFiles, getFilesByUserId };
+async function deleteFileById(query: {
+  fileId: string;
+  userId: string;
+  type?: string;
+}) {
+  const file = await prisma.file.delete({
+    where: {
+      id: query.fileId,
+      userId: query.userId,
+      type: query.type,
+    },
+    select: {
+      id: true,
+      originalName: true,
+      name: true,
+      type: true,
+      isExpired: true,
+      expiredAt: true,
+      updatedAt: true,
+      user: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  });
+
+  return { file };
+}
+
+export { uploadFiles, createFiles, getFilesByUserId, deleteFileById };

@@ -5,11 +5,17 @@ import type { Tier } from "@prisma/client";
 import { TierConstraints } from "../constants/tiers";
 import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
-import { createFiles, getFilesByUserId, uploadFiles } from "../services/file";
+import {
+  createFiles,
+  deleteFileById,
+  getFilesByUserId,
+  uploadFiles,
+} from "../services/file";
 import { createLink, getLinkById } from "../services/link";
 import { createMail, sendFiles } from "../services/mail";
 import { updateUserById } from "../services/user";
 import {
+  deleteFileParamsSchema,
   generateFileLinkBodySchema,
   getLinkParamsSchema,
   sendFileMailBodySchema,
@@ -211,7 +217,23 @@ async function getLink(request: Request, response: Response) {
   }
 }
 
-export { generateFileLink, sendFileMail, getUserFiles, getLink };
+async function deleteFile(request: Request, response: Response) {
+  try {
+    const { fileId } = deleteFileParamsSchema.parse(request.params);
+
+    const { file } = await deleteFileById({ fileId, userId: request.user.id });
+
+    if (!file) {
+      throw new BadResponse("File Not Found!");
+    }
+
+    response.success({ file }, { message: "File Deleted Successfully!" });
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
+export { generateFileLink, sendFileMail, getUserFiles, getLink, deleteFile };
 
 function validateFileConstraints({
   userTier,
