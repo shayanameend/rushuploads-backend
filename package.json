@@ -4,6 +4,10 @@
   "license": "MIT",
   "main": "src/server.ts",
   "scripts": {
+    "biome:check": "biome check",
+    "biome:safe": "biome check --write",
+    "biome:unsafe": "biome check --write --unsafe",
+    "prisma:generate": "prisma generate",
     "start": "tsx src/server.ts",
     "watch": "tsx --watch src/server.ts"
   },
