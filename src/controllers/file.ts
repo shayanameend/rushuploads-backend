@@ -5,12 +5,13 @@ import type { Tier } from "@prisma/client";
 import { TierConstraints } from "../constants/tiers";
 import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
-import { createFiles, uploadFiles } from "../services/file";
+import { createFiles, getFilesByUserId, uploadFiles } from "../services/file";
 import { createLink } from "../services/link";
 import { createMail, sendFiles } from "../services/mail";
 import { updateUserById } from "../services/user";
 import {
   generateFileLinkBodySchema,
+  getUserFilesParamsSchema,
   sendFileMailBodySchema,
 } from "../validators/file";
 
@@ -162,7 +163,29 @@ async function sendFileMail(request: Request, response: Response) {
   }
 }
 
-export { generateFileLink, sendFileMail };
+async function getUserFiles(request: Request, response: Response) {
+  try {
+    const { userId } = getUserFilesParamsSchema.parse(request.params);
+
+    const { files } = await getFilesByUserId({ userId });
+
+    const augmentedFiles = files.map((file) => ({
+      ...file,
+      url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
+    }));
+
+    response.success(
+      {
+        data: { files: augmentedFiles },
+      },
+      { message: "Files Fetched Successfully!" },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
+export { generateFileLink, sendFileMail, getUserFiles };
 
 function validateFileConstraints({
   userTier,

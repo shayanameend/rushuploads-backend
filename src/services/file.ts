@@ -68,4 +68,32 @@ async function createFiles(payload: {
   return { files };
 }
 
-export { uploadFiles, createFiles };
+async function getFilesByUserId(query: {
+  userId: string;
+  type?: string;
+}) {
+  const files = await prisma.file.findMany({
+    where: {
+      userId: query.userId,
+      type: query.type,
+    },
+    select: {
+      id: true,
+      originalName: true,
+      name: true,
+      type: true,
+      isExpired: true,
+      expiredAt: true,
+      updatedAt: true,
+      user: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  });
+
+  return { files };
+}
+
+export { uploadFiles, createFiles, getFilesByUserId };

@@ -1,7 +1,11 @@
 import { Role } from "@prisma/client";
 import { Router } from "express";
 
-import { generateFileLink, sendFileMail } from "../controllers/file";
+import {
+  generateFileLink,
+  getUserFiles,
+  sendFileMail,
+} from "../controllers/file";
 import { verifyRequest } from "../middlewares/auth";
 import { upload } from "../middlewares/upload";
 
@@ -19,6 +23,12 @@ fileRouter.post(
   verifyRequest({ isVerified: true, role: Role.USER }),
   upload,
   sendFileMail,
+);
+
+fileRouter.get(
+  "/user",
+  verifyRequest({ isVerified: true, role: Role.USER }),
+  getUserFiles,
 );
 
 export { fileRouter };
