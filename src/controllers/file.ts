@@ -11,7 +11,6 @@ import { createMail, sendFiles } from "../services/mail";
 import { updateUserById } from "../services/user";
 import {
   generateFileLinkBodySchema,
-  getUserFilesParamsSchema,
   sendFileMailBodySchema,
 } from "../validators/file";
 
@@ -165,9 +164,7 @@ async function sendFileMail(request: Request, response: Response) {
 
 async function getUserFiles(request: Request, response: Response) {
   try {
-    const { userId } = getUserFilesParamsSchema.parse(request.params);
-
-    const { files } = await getFilesByUserId({ userId });
+    const { files } = await getFilesByUserId({ userId: request.user?.id });
 
     const augmentedFiles = files.map((file) => ({
       ...file,
