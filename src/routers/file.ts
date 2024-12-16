@@ -3,6 +3,7 @@ import { Router } from "express";
 
 import {
   generateFileLink,
+  getLink,
   getUserFiles,
   sendFileMail,
 } from "../controllers/file";
@@ -29,6 +30,12 @@ fileRouter.get(
   "/user",
   verifyRequest({ isVerified: true, role: Role.USER }),
   getUserFiles,
+);
+
+fileRouter.get(
+  "/link/:linkId",
+  verifyRequest({ isVerified: true, role: Role.USER }),
+  getLink,
 );
 
 export { fileRouter };

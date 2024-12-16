@@ -189,6 +189,10 @@ async function getLink(request: Request, response: Response) {
 
     const { link } = await getLinkById({ id: linkId });
 
+    if (!link) {
+      throw new BadResponse("Link Not Found!");
+    }
+
     const augmentedFiles = link.files.map((file) => ({
       ...file,
       url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
