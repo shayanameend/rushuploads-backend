@@ -7,8 +7,9 @@ import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
 import {
   createFiles,
-  deleteFileById,
   getFilesByUserId,
+  removeFile,
+  updateFileById,
   uploadFiles,
 } from "../services/file";
 import { createLink, getLinkById } from "../services/link";
@@ -221,11 +222,16 @@ async function deleteFile(request: Request, response: Response) {
   try {
     const { fileId } = deleteFileParamsSchema.parse(request.params);
 
-    const { file } = await deleteFileById({ fileId, userId: request.user.id });
+    const { file } = await updateFileById(
+      { fileId, userId: request.user.id },
+      { isDeleted: true },
+    );
 
     if (!file) {
       throw new BadResponse("File Not Found!");
     }
+
+    await removeFile({ key: file.name });
 
     response.success({ file }, { message: "File Deleted Successfully!" });
   } catch (error) {

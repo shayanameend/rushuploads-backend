@@ -1,22 +1,5 @@
-import { DeleteObjectCommand } from "@aws-sdk/client-s3";
-
-import { env } from "../lib/env";
 import { prisma } from "../lib/prisma";
-import { s3Client } from "../lib/s3";
-
-async function deleteFileFromS3(fileKey: string) {
-  const deleteCommand = new DeleteObjectCommand({
-    Bucket: env.AWS_BUCKET,
-    Key: fileKey,
-  });
-
-  try {
-    await s3Client.send(deleteCommand);
-    console.log(`File ${fileKey} deleted from S3.`);
-  } catch (error) {
-    console.error(`Error deleting file ${fileKey} from S3:`, error);
-  }
-}
+import { removeFile } from "../services/file";
 
 async function cleanupExpiredFiles() {
   const now = new Date();
@@ -30,7 +13,13 @@ async function cleanupExpiredFiles() {
   });
 
   for (const file of expiredFiles) {
-    await deleteFileFromS3(file.name);
+    try {
+      await removeFile({ key: file.name });
+
+      console.log(`File ${file.name} deleted from S3.`);
+    } catch (error) {
+      console.error(`Error deleting file ${file.name} from S3:`, error);
+    }
   }
 
   await prisma.file.updateMany({
