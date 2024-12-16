@@ -6,11 +6,12 @@ import { TierConstraints } from "../constants/tiers";
 import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
 import { createFiles, getFilesByUserId, uploadFiles } from "../services/file";
-import { createLink } from "../services/link";
+import { createLink, getLinkById } from "../services/link";
 import { createMail, sendFiles } from "../services/mail";
 import { updateUserById } from "../services/user";
 import {
   generateFileLinkBodySchema,
+  getLinkParamsSchema,
   sendFileMailBodySchema,
 } from "../validators/file";
 
@@ -182,7 +183,31 @@ async function getUserFiles(request: Request, response: Response) {
   }
 }
 
-export { generateFileLink, sendFileMail, getUserFiles };
+async function getLink(request: Request, response: Response) {
+  try {
+    const { linkId } = getLinkParamsSchema.parse(request.params);
+
+    const { link } = await getLinkById({ id: linkId });
+
+    const augmentedFiles = link.files.map((file) => ({
+      ...file,
+      url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
+    }));
+
+    link.files = augmentedFiles;
+
+    response.success(
+      {
+        data: { link },
+      },
+      { message: "Link Fetched Successfully!" },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
+export { generateFileLink, sendFileMail, getUserFiles, getLink };
 
 function validateFileConstraints({
   userTier,

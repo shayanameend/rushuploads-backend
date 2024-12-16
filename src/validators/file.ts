@@ -45,4 +45,14 @@ const sendFileMailBodySchema = zod.object({
   }),
 });
 
-export { generateFileLinkBodySchema, sendFileMailBodySchema };
+const getLinkParamsSchema = zod.object({
+  linkId: zod.string({
+    message: "Link ID must be a string!",
+  }),
+});
+
+export {
+  generateFileLinkBodySchema,
+  sendFileMailBodySchema,
+  getLinkParamsSchema,
+};

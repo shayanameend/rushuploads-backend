@@ -46,4 +46,34 @@ async function createLink(payload: {
   return { link };
 }
 
-export { createLink };
+async function getLinkById(query: { id: string }) {
+  const link = await prisma.link.findUnique({
+    where: { id: query.id },
+    select: {
+      id: true,
+      title: true,
+      message: true,
+      updatedAt: true,
+      files: {
+        select: {
+          id: true,
+          originalName: true,
+          name: true,
+          type: true,
+          isExpired: true,
+          expiredAt: true,
+          updatedAt: true,
+        },
+      },
+      user: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  });
+
+  return { link };
+}
+
+export { createLink, getLinkById };
