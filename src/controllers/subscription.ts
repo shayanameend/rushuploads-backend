@@ -5,11 +5,15 @@ import { Tier } from "@prisma/client";
 import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
 import { stripe } from "../lib/stripe";
-import { createCheckoutSessionQuerySchema } from "../validators/subscription";
+import {
+  createCheckoutSession,
+  createPortalSession,
+} from "../services/subscription";
+import { createCheckoutQuerySchema } from "../validators/subscription";
 
-async function createCheckoutSession(request: Request, response: Response) {
+async function createCheckout(request: Request, response: Response) {
   try {
-    const { tier } = createCheckoutSessionQuerySchema.parse(request.query);
+    const { tier } = createCheckoutQuerySchema.parse(request.query);
 
     let priceId: string;
 
@@ -24,21 +28,14 @@ async function createCheckoutSession(request: Request, response: Response) {
         throw new BadResponse("Invalid Tier");
     }
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      success_url: `${env.CLIENT_BASE_URL}/${env.STRIPE_SUCCESS_ENDPOINT}`,
-      cancel_url: `${env.CLIENT_BASE_URL}/${env.STRIPE_CANCEL_ENDPOINT}`,
-    });
+    const { session } = await createCheckoutSession({ priceId });
 
-    return response.success(
+    return response.created(
       {
-        url: session.url,
+        data: {
+          sessionId: session.id,
+          url: session.url,
+        },
       },
       {
         message: "Checkout Session Created!",
@@ -49,18 +46,22 @@ async function createCheckoutSession(request: Request, response: Response) {
   }
 }
 
-async function createPortalSession(request: Request, response: Response) {
+async function createPortal(request: Request, response: Response) {
   try {
-    const customerId = getCustomerId({ userId: request.user?.id });
+    const customerId = "cus_RPwJKpOopURtXt";
 
-    const session = await stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: env.CLIENT_BASE_URL,
-    });
+    if (!customerId) {
+      throw new BadResponse("Customer Not Found!");
+    }
 
-    return response.success(
+    const { session } = await createPortalSession({ customerId });
+
+    return response.created(
       {
-        url: session.url,
+        data: {
+          sessionId: session.id,
+          url: session.url,
+        },
       },
       {
         message: "Portal Session Created!",
@@ -117,4 +118,4 @@ async function stripeWebhook(request: Request, response: Response) {
   }
 }
 
-export { createCheckoutSession, createPortalSession, stripeWebhook };
+export { createCheckout, createPortal, stripeWebhook };
