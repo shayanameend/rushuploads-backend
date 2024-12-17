@@ -12,19 +12,22 @@ const subscriptionRouter = Router();
 
 subscriptionRouter.post(
   "/checkout",
+  express.json(),
+  express.urlencoded({ extended: true }),
   verifyRequest({ isVerified: true, role: Role.USER }),
   createCheckoutSession,
 );
 
 subscriptionRouter.post(
   "/portal",
+  express.json(),
+  express.urlencoded({ extended: true }),
   verifyRequest({ isVerified: true, role: Role.USER }),
   createPortalSession,
 );
 
 subscriptionRouter.post(
   "/webhook",
-  verifyRequest({ isVerified: true, role: Role.USER }),
   express.raw({ type: "application/json" }),
   stripeWebhook,
 );

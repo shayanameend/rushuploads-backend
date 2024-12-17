@@ -5,10 +5,7 @@ import { Tier } from "@prisma/client";
 import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
 import { stripe } from "../lib/stripe";
-import {
-  createCheckoutSessionQuerySchema,
-  createPortalSessionQuerySchema,
-} from "../validators/subscription";
+import { createCheckoutSessionQuerySchema } from "../validators/subscription";
 
 async function createCheckoutSession(request: Request, response: Response) {
   try {
@@ -54,7 +51,7 @@ async function createCheckoutSession(request: Request, response: Response) {
 
 async function createPortalSession(request: Request, response: Response) {
   try {
-    const { customerId } = createPortalSessionQuerySchema.parse(request.query);
+    const customerId = getCustomerId({ userId: request.user?.id });
 
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
@@ -110,8 +107,11 @@ async function stripeWebhook(request: Request, response: Response) {
         // Handle invoice.payment_failed
         break;
       default:
-        throw new BadResponse("Invalid Event");
+        console.log("Unhandled Event");
+        break;
     }
+
+    return response.success({}, { message: "Webhook Received!" });
   } catch (error) {
     return handleErrors({ response, error });
   }

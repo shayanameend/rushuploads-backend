@@ -19,13 +19,26 @@ app.use(
   }),
 );
 app.use(morgan("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(expandResponse);
 
-app.use("/auth", authRouter);
-app.use("/users", userRouter);
-app.use("/files", fileRouter);
+app.use(
+  "/auth",
+  express.json(),
+  express.urlencoded({ extended: true }),
+  authRouter,
+);
+app.use(
+  "/users",
+  express.json(),
+  express.urlencoded({ extended: true }),
+  userRouter,
+);
+app.use(
+  "/files",
+  express.json(),
+  express.urlencoded({ extended: true }),
+  fileRouter,
+);
 app.use("/subscriptions", subscriptionRouter);
 
 app.get("/test", verifyRequest({ isVerified: true }), (_request, response) => {
