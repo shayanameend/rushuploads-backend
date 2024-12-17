@@ -8,8 +8,8 @@ import {
   UnauthorizedResponse,
   handleErrors,
 } from "../lib/error";
-import { verifyToken } from "../services/jwt";
 import { getUserById } from "../services/user";
+import { verifyToken } from "../utils/jwt";
 
 interface VerifyRequestParams {
   role?: Role;
@@ -49,7 +49,7 @@ function verifyRequest({ role, isVerified }: Readonly<VerifyRequestParams>) {
 
       next();
     } catch (error) {
-      handleErrors(response, error);
+      handleErrors({ response, error });
 
       return;
     }

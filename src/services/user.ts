@@ -1,21 +1,28 @@
 import { type Prisma, Role } from "@prisma/client";
 
+import { TierConstraints } from "../constants/tiers";
 import { prisma } from "../lib/prisma";
 
-async function createUser(payload: Prisma.UserCreateInput) {
+async function createUser(payload: {
+  email: string;
+  password: string;
+  role: Role;
+}) {
   const user = await prisma.user.create({
     data: {
       email: payload.email,
       password: payload.password,
       role: payload.role,
+      remainingStorage: TierConstraints.FREE.maxStorage,
     },
     select: {
       id: true,
       email: true,
       password: true,
       role: true,
+      tier: true,
+      remainingStorage: true,
       isVerified: true,
-      createdAt: true,
       updatedAt: true,
     },
   });
@@ -35,8 +42,9 @@ async function getUserById(query: { id: string; role?: Role }) {
       email: true,
       password: true,
       role: true,
+      tier: true,
+      remainingStorage: true,
       isVerified: true,
-      createdAt: true,
       updatedAt: true,
     },
   });
@@ -56,8 +64,9 @@ async function getUserByEmail(query: { email: string; role?: Role }) {
       email: true,
       password: true,
       role: true,
+      tier: true,
+      remainingStorage: true,
       isVerified: true,
-      createdAt: true,
       updatedAt: true,
     },
   });
@@ -92,8 +101,9 @@ async function getUsers(
       id: true,
       email: true,
       role: true,
+      tier: true,
+      remainingStorage: true,
       isVerified: true,
-      createdAt: true,
       updatedAt: true,
     },
     skip: query.skip,
@@ -119,8 +129,9 @@ async function updateUserById(
       email: true,
       password: true,
       role: true,
+      tier: true,
+      remainingStorage: true,
       isVerified: true,
-      createdAt: true,
       updatedAt: true,
     },
   });
@@ -144,8 +155,9 @@ async function updateUserByEmail(
       email: true,
       password: true,
       role: true,
+      tier: true,
+      remainingStorage: true,
       isVerified: true,
-      createdAt: true,
       updatedAt: true,
     },
   });

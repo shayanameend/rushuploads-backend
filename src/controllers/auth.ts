@@ -4,10 +4,10 @@ import { OtpType } from "@prisma/client";
 import argon from "argon2";
 
 import { BadResponse, NotFoundResponse, handleErrors } from "../lib/error";
-import { signToken } from "../services/jwt";
-import { sendMail } from "../services/mail";
+import { sendOTP } from "../services/mail";
 import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
 import { createUser, getUserByEmail, updateUserById } from "../services/user";
+import { signToken } from "../utils/jwt";
 import {
   signInSchema,
   signUpSchema,
@@ -37,7 +37,7 @@ async function signUp(request: Request, response: Response) {
     });
 
     if (!user) {
-      throw new NotFoundResponse("User not found!");
+      throw new NotFoundResponse("User Not Found!");
     }
 
     user.isVerified = user.password ? user.isVerified : false;
@@ -46,8 +46,9 @@ async function signUp(request: Request, response: Response) {
       id: user.id,
       email: user.email,
       role: user.role,
+      tier: user.tier,
+      remainingStorage: user.remainingStorage,
       isVerified: user.isVerified,
-      createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
 
@@ -56,15 +57,14 @@ async function signUp(request: Request, response: Response) {
       { otpType: OtpType.VERIFY_EMAIL },
     );
 
-    await sendMail({
+    await sendOTP({
       to: user.email,
-      subject: "Verify Email",
-      body: `Your otp is: ${otp.code}`,
+      code: otp.code,
     });
 
     user.password = undefined;
 
-    response.success(
+    response.created(
       {
         data: { user, token },
       },
@@ -75,7 +75,7 @@ async function signUp(request: Request, response: Response) {
 
     return;
   } catch (error) {
-    handleErrors(response, error);
+    handleErrors({ response, error });
 
     return;
   }
@@ -97,8 +97,9 @@ async function signIn(request: Request, response: Response) {
       id: user.id,
       email: user.email,
       role: user.role,
+      tier: user.tier,
+      remainingStorage: user.remainingStorage,
       isVerified: user.isVerified,
-      createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
 
@@ -108,10 +109,9 @@ async function signIn(request: Request, response: Response) {
         { otpType: OtpType.VERIFY_EMAIL },
       );
 
-      await sendMail({
+      await sendOTP({
         to: user.email,
-        subject: "Verify Email",
-        body: `Your otp is: ${otp.code}`,
+        code: otp.code,
       });
 
       user.password = undefined;
@@ -140,10 +140,9 @@ async function signIn(request: Request, response: Response) {
         { otpType: OtpType.VERIFY_EMAIL },
       );
 
-      await sendMail({
+      await sendOTP({
         to: user.email,
-        subject: "Verify Email",
-        body: `Your otp is: ${otp.code}`,
+        code: otp.code,
       });
 
       user.password = undefined;
@@ -173,7 +172,7 @@ async function signIn(request: Request, response: Response) {
 
     return;
   } catch (error) {
-    handleErrors(response, error);
+    handleErrors({ response, error });
 
     return;
   }
@@ -191,8 +190,9 @@ async function verifyOtp(request: Request, response: Response) {
       id: user.id,
       email: user.email,
       role: user.role,
+      tier: user.tier,
+      remainingStorage: user.remainingStorage,
       isVerified: user.isVerified,
-      createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
 
@@ -223,7 +223,7 @@ async function verifyOtp(request: Request, response: Response) {
 
     return;
   } catch (error) {
-    handleErrors(response, error);
+    handleErrors({ response, error });
 
     return;
   }

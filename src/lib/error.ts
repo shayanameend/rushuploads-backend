@@ -1,4 +1,5 @@
 import type { Response } from "express";
+
 import { ZodError } from "zod";
 
 class ErrorResponse extends Error {
@@ -35,14 +36,15 @@ class NotFoundResponse extends ErrorResponse {
   }
 }
 
-function handleErrors(response: Response, error: Error) {
+function handleErrors({
+  response,
+  error,
+}: { response: Response; error: unknown }) {
   if (error instanceof ZodError) {
     response.badRequest(
+      {},
       {
-        error: error,
-      },
-      {
-        message: error.message,
+        message: "Invalid Data!",
       },
     );
 
@@ -53,9 +55,7 @@ function handleErrors(response: Response, error: Error) {
     switch (error.status) {
       case 400:
         response.badRequest(
-          {
-            error: error,
-          },
+          {},
           {
             message: error.message,
           },
@@ -65,9 +65,7 @@ function handleErrors(response: Response, error: Error) {
 
       case 401:
         response.unauthorized(
-          {
-            error: error,
-          },
+          {},
           {
             message: error.message,
           },
@@ -77,9 +75,7 @@ function handleErrors(response: Response, error: Error) {
 
       case 403:
         response.forbidden(
-          {
-            error: error,
-          },
+          {},
           {
             message: error.message,
           },
@@ -89,9 +85,7 @@ function handleErrors(response: Response, error: Error) {
 
       case 404:
         response.notFound(
-          {
-            error: error,
-          },
+          {},
           {
             message: error.message,
           },
@@ -101,11 +95,11 @@ function handleErrors(response: Response, error: Error) {
     }
   }
 
+  console.error(error);
+
   if (error instanceof Error) {
     response.internalServerError(
-      {
-        error: error,
-      },
+      {},
       {
         message: error.message,
       },
@@ -115,13 +109,13 @@ function handleErrors(response: Response, error: Error) {
   }
 
   response.internalServerError(
-    {
-      error: error,
-    },
+    {},
     {
       message: "Something went wrong!",
     },
   );
+
+  return;
 }
 
 export {
