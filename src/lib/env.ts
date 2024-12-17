@@ -14,11 +14,17 @@ const envSchema = zod.object({
   NODEMAILER_EMAIL: zod.string().email(),
   NODEMAILER_PASSWORD: zod.string(),
   DATABASE_URL: zod.string().url(),
+  CLIENT_BASE_URL: zod.string().url(),
   AWS_ACCESS_KEY_ID: zod.string(),
   AWS_SECRET_ACCESS_KEY: zod.string(),
   AWS_BUCKET: zod.string(),
   AWS_REGION: zod.string(),
   STRIPE_SECRET_KEY: zod.string(),
+  STRIPE_WEBHOOK_SECRET_KEY: zod.string(),
+  STRIPE_PRO_PRICE_ID: zod.string(),
+  STRIPE_PREMIUM_PRICE_ID: zod.string(),
+  STRIPE_SUCCESS_ENDPOINT: zod.string(),
+  STRIPE_CANCEL_ENDPOINT: zod.string(),
 });
 
 export const env = envSchema.parse(process.env);
