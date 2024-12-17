@@ -6,13 +6,13 @@ import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
 import { stripe } from "../lib/stripe";
 import {
-  getCheckoutSessionQuerySchema,
-  getPortalSessionQuerySchema,
+  createCheckoutSessionQuerySchema,
+  createPortalSessionQuerySchema,
 } from "../validators/subscription";
 
-async function getCheckoutSession(request: Request, response: Response) {
+async function createCheckoutSession(request: Request, response: Response) {
   try {
-    const { tier } = getCheckoutSessionQuerySchema.parse(request.query);
+    const { tier } = createCheckoutSessionQuerySchema.parse(request.query);
 
     let priceId: string;
 
@@ -39,22 +39,36 @@ async function getCheckoutSession(request: Request, response: Response) {
       cancel_url: `${env.CLIENT_BASE_URL}/${env.STRIPE_CANCEL_ENDPOINT}`,
     });
 
-    return response.redirect(session.url);
+    return response.success(
+      {
+        url: session.url,
+      },
+      {
+        message: "Checkout Session Created!",
+      },
+    );
   } catch (error) {
     return handleErrors({ response, error });
   }
 }
 
-async function getPortalSession(request: Request, response: Response) {
+async function createPortalSession(request: Request, response: Response) {
   try {
-    const { customerId } = getPortalSessionQuerySchema.parse(request.query);
+    const { customerId } = createPortalSessionQuerySchema.parse(request.query);
 
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: env.CLIENT_BASE_URL,
     });
 
-    return response.redirect(session.url);
+    return response.success(
+      {
+        url: session.url,
+      },
+      {
+        message: "Portal Session Created!",
+      },
+    );
   } catch (error) {
     return handleErrors({ response, error });
   }
@@ -103,4 +117,4 @@ async function stripeWebhook(request: Request, response: Response) {
   }
 }
 
-export { getCheckoutSession, getPortalSession, stripeWebhook };
+export { createCheckoutSession, createPortalSession, stripeWebhook };

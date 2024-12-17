@@ -2,24 +2,24 @@ import { Role } from "@prisma/client";
 import express, { Router } from "express";
 
 import {
-  getCheckoutSession,
-  getPortalSession,
+  createCheckoutSession,
+  createPortalSession,
   stripeWebhook,
 } from "../controllers/subscription";
 import { verifyRequest } from "../middlewares/auth";
 
 const subscriptionRouter = Router();
 
-subscriptionRouter.get(
+subscriptionRouter.post(
   "/checkout",
   verifyRequest({ isVerified: true, role: Role.USER }),
-  getCheckoutSession,
+  createCheckoutSession,
 );
 
-subscriptionRouter.get(
+subscriptionRouter.post(
   "/portal",
   verifyRequest({ isVerified: true, role: Role.USER }),
-  getPortalSession,
+  createPortalSession,
 );
 
 subscriptionRouter.post(

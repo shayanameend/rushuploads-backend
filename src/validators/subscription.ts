@@ -1,12 +1,12 @@
 import { Tier } from "@prisma/client";
 import * as zod from "zod";
 
-const getCheckoutSessionQuerySchema = zod.object({
+const createCheckoutSessionQuerySchema = zod.object({
   tier: zod.enum([Tier.PRO, Tier.PREMIUM]),
 });
 
-const getPortalSessionQuerySchema = zod.object({
+const createPortalSessionQuerySchema = zod.object({
   customerId: zod.string(),
 });
 
-export { getCheckoutSessionQuerySchema, getPortalSessionQuerySchema };
+export { createCheckoutSessionQuerySchema, createPortalSessionQuerySchema };
