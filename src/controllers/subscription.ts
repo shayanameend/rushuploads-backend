@@ -30,6 +30,8 @@ async function createCheckout(request: Request, response: Response) {
 
     const { session } = await createCheckoutSession({ priceId });
 
+    // response.redirect(session.url);
+
     return response.created(
       {
         data: {
@@ -55,6 +57,8 @@ async function createPortal(request: Request, response: Response) {
     }
 
     const { session } = await createPortalSession({ customerId });
+
+    // response.redirect(session.url);
 
     return response.created(
       {
