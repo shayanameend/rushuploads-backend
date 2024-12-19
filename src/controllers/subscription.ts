@@ -98,8 +98,7 @@ async function stripeWebhook(request: Request, response: Response) {
         await handleSubscriptionUpdated({ event });
         break;
       default:
-        console.log(`Unhandled 
-          Event: ${event.type}`);
+        console.log(`Unhandled Event: ${event.type}`);
         break;
     }
 
