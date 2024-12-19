@@ -8,15 +8,14 @@ import { verifyRequest } from "./middlewares/auth";
 import { expandResponse } from "./middlewares/response";
 import { authRouter } from "./routers/auth";
 import { fileRouter } from "./routers/file";
+import { subscriptionRouter } from "./routers/subscription";
 import { userRouter } from "./routers/user";
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "*",
-  }),
-);
+app.use("/subscriptions/webhook", express.raw({ type: "application/json" }));
+
+app.use(cors({ origin: "*" }));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -25,15 +24,10 @@ app.use(expandResponse);
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
 app.use("/files", fileRouter);
+app.use("/subscriptions", subscriptionRouter);
 
 app.get("/test", verifyRequest({ isVerified: true }), (_request, response) => {
   response.success({}, { message: "Test route!" });
-});
-
-app.use("/uploads", express.static("uploads"));
-
-app.all("/uploads/*", (_request, response) => {
-  response.notFound({}, { message: "Expired!" });
 });
 
 app.all("*", (_request, response) => {

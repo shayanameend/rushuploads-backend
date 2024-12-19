@@ -9,7 +9,8 @@ async function signToken(payload: {
   email: string;
   role: Role;
   tier: Tier;
-  remainingStorage: number;
+  totalStorage: number;
+  usedStorage: number;
   isVerified: boolean;
   updatedAt: Date;
 }) {

@@ -1,6 +1,5 @@
-import type { Request, Response } from "express";
-
 import type { Tier } from "@prisma/client";
+import type { Request, Response } from "express";
 
 import { TierConstraints } from "../constants/tiers";
 import { env } from "../lib/env";
@@ -43,7 +42,7 @@ async function generateFileLink(request: Request, response: Response) {
       userTier,
       totalFileSize,
       expiresInMs,
-      remainingStorage: request.user.remainingStorage,
+      remainingStorage: request.user.totalStorage - request.user.usedStorage,
     });
 
     const expiresAt = new Date(Date.now() + expiresInMs);
@@ -60,7 +59,7 @@ async function generateFileLink(request: Request, response: Response) {
       updateUserById(
         { id: request.user.id },
         {
-          remainingStorage: request.user.remainingStorage - totalFileSize,
+          usedStorage: request.user.usedStorage + totalFileSize,
         },
       ),
     ]);
@@ -115,7 +114,7 @@ async function sendFileMail(request: Request, response: Response) {
       userTier,
       totalFileSize,
       expiresInMs,
-      remainingStorage: request.user.remainingStorage,
+      remainingStorage: request.user.totalStorage - request.user.usedStorage,
     });
 
     const expiresAt = new Date(Date.now() + expiresInMs);
@@ -132,7 +131,7 @@ async function sendFileMail(request: Request, response: Response) {
       updateUserById(
         { id: request.user.id },
         {
-          remainingStorage: request.user.remainingStorage - totalFileSize,
+          usedStorage: request.user.usedStorage + totalFileSize,
         },
       ),
     ]);

@@ -44,6 +44,9 @@ importers:
       socket.io:
         specifier: ^4.8.1
         version: 4.8.1
+      stripe:
+        specifier: ^17.4.0
+        version: 17.4.0
       uuid:
         specifier: ^11.0.3
         version: 11.0.3
@@ -1163,6 +1166,10 @@ packages:
 
   string_decoder@1.1.1:
     resolution: {integrity: sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==}
+
+  stripe@17.4.0:
+    resolution: {integrity: sha512-sQQGZguPxe7/QYXJKtDpfzT2OAH9F8nyE2SOsVdTU793iiU33/dpaKgWaJEGJm8396Yy/6NvTLblgdHlueGLhA==}
+    engines: {node: '>=12.*'}
 
   strnum@1.0.5:
     resolution: {integrity: sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==}
@@ -2800,6 +2807,11 @@ snapshots:
   string_decoder@1.1.1:
     dependencies:
       safe-buffer: 5.1.2
+
+  stripe@17.4.0:
+    dependencies:
+      '@types/node': 22.10.1
+      qs: 6.13.0
 
   strnum@1.0.5: {}
 
