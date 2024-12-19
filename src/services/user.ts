@@ -3,33 +3,6 @@ import { type Prisma, Role } from "@prisma/client";
 import { TierConstraints } from "../constants/tiers";
 import { prisma } from "../lib/prisma";
 
-async function createUser(payload: {
-  email: string;
-  password: string;
-  role: Role;
-}) {
-  const user = await prisma.user.create({
-    data: {
-      email: payload.email,
-      password: payload.password,
-      role: payload.role,
-      remainingStorage: TierConstraints.FREE.maxStorage,
-    },
-    select: {
-      id: true,
-      email: true,
-      password: true,
-      role: true,
-      tier: true,
-      remainingStorage: true,
-      isVerified: true,
-      updatedAt: true,
-    },
-  });
-
-  return { user };
-}
-
 async function getUserById(query: { id: string; role?: Role }) {
   const user = await prisma.user.findUnique({
     where: {
@@ -43,7 +16,8 @@ async function getUserById(query: { id: string; role?: Role }) {
       password: true,
       role: true,
       tier: true,
-      remainingStorage: true,
+      totalStorage: true,
+      usedStorage: true,
       isVerified: true,
       updatedAt: true,
     },
@@ -65,7 +39,8 @@ async function getUserByEmail(query: { email: string; role?: Role }) {
       password: true,
       role: true,
       tier: true,
-      remainingStorage: true,
+      totalStorage: true,
+      usedStorage: true,
       isVerified: true,
       updatedAt: true,
     },
@@ -102,7 +77,8 @@ async function getUsers(
       email: true,
       role: true,
       tier: true,
-      remainingStorage: true,
+      totalStorage: true,
+      usedStorage: true,
       isVerified: true,
       updatedAt: true,
     },
@@ -111,6 +87,35 @@ async function getUsers(
   });
 
   return { users };
+}
+
+async function createUser(payload: {
+  email: string;
+  password: string;
+  role: Role;
+}) {
+  const user = await prisma.user.create({
+    data: {
+      email: payload.email,
+      password: payload.password,
+      role: payload.role,
+      totalStorage: TierConstraints.FREE.maxStorage,
+      usedStorage: 0,
+    },
+    select: {
+      id: true,
+      email: true,
+      password: true,
+      role: true,
+      tier: true,
+      totalStorage: true,
+      usedStorage: true,
+      isVerified: true,
+      updatedAt: true,
+    },
+  });
+
+  return { user };
 }
 
 async function updateUserById(
@@ -130,7 +135,8 @@ async function updateUserById(
       password: true,
       role: true,
       tier: true,
-      remainingStorage: true,
+      totalStorage: true,
+      usedStorage: true,
       isVerified: true,
       updatedAt: true,
     },
@@ -156,7 +162,8 @@ async function updateUserByEmail(
       password: true,
       role: true,
       tier: true,
-      remainingStorage: true,
+      totalStorage: true,
+      usedStorage: true,
       isVerified: true,
       updatedAt: true,
     },
@@ -182,10 +189,10 @@ async function deleteUserByEmail(query: { email: string; role?: Role }) {
 }
 
 export {
-  createUser,
   getUserById,
   getUserByEmail,
   getUsers,
+  createUser,
   updateUserById,
   updateUserByEmail,
   deleteUserById,

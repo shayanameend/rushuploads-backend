@@ -47,7 +47,8 @@ async function signUp(request: Request, response: Response) {
       email: user.email,
       role: user.role,
       tier: user.tier,
-      remainingStorage: user.remainingStorage,
+      totalStorage: user.totalStorage,
+      usedStorage: user.usedStorage,
       isVerified: user.isVerified,
       updatedAt: user.updatedAt,
     });
@@ -98,7 +99,8 @@ async function signIn(request: Request, response: Response) {
       email: user.email,
       role: user.role,
       tier: user.tier,
-      remainingStorage: user.remainingStorage,
+      totalStorage: user.totalStorage,
+      usedStorage: user.usedStorage,
       isVerified: user.isVerified,
       updatedAt: user.updatedAt,
     });
@@ -191,7 +193,8 @@ async function verifyOtp(request: Request, response: Response) {
       email: user.email,
       role: user.role,
       tier: user.tier,
-      remainingStorage: user.remainingStorage,
+      totalStorage: user.totalStorage,
+      usedStorage: user.usedStorage,
       isVerified: user.isVerified,
       updatedAt: user.updatedAt,
     });

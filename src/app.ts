@@ -13,13 +13,9 @@ import { userRouter } from "./routers/user";
 
 const app = express();
 
-app.use("/webhook", express.raw({ type: "application/json" }));
+app.use("/subscriptions/webhook", express.raw({ type: "application/json" }));
 
-app.use(
-  cors({
-    origin: "*",
-  }),
-);
+app.use(cors({ origin: "*" }));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -32,12 +28,6 @@ app.use("/subscriptions", subscriptionRouter);
 
 app.get("/test", verifyRequest({ isVerified: true }), (_request, response) => {
   response.success({}, { message: "Test route!" });
-});
-
-app.use("/uploads", express.static("uploads"));
-
-app.all("/uploads/*", (_request, response) => {
-  response.notFound({}, { message: "Expired!" });
 });
 
 app.all("*", (_request, response) => {
