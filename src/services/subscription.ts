@@ -1,6 +1,6 @@
 import type Stripe from "stripe";
 
-import { SubscriptionStatus, Tier } from "@prisma/client";
+import { SubscriptionStatus } from "@prisma/client";
 
 import { PriceIdToTierMap, TierConstraints } from "../constants/tiers";
 import { env } from "../lib/env";
@@ -45,7 +45,6 @@ async function createCheckoutSession(payload: {
     ],
     success_url: `${env.CLIENT_BASE_URL}${env.STRIPE_SUCCESS_ENDPOINT}`,
     cancel_url: `${env.CLIENT_BASE_URL}${env.STRIPE_CANCEL_ENDPOINT}`,
-    return_url: `${env.CLIENT_BASE_URL}${env.STRIPE_RETURN_ENDPOINT}`,
     metadata: {
       userId: payload.userId,
     },
