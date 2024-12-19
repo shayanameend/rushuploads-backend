@@ -35,7 +35,7 @@ async function createCheckoutSession(payload: {
   userId: string;
   priceId: string;
 }) {
-  if (!payload.userId && !payload.priceId) {
+  if (!payload.userId || !payload.priceId) {
     console.log({ payload });
 
     throw new Error("Missing Required Fields!");
@@ -51,7 +51,9 @@ async function createCheckoutSession(payload: {
     ],
     success_url: `${env.CLIENT_BASE_URL}${env.STRIPE_SUCCESS_ENDPOINT}`,
     cancel_url: `${env.CLIENT_BASE_URL}${env.STRIPE_CANCEL_ENDPOINT}`,
-    client_reference_id: payload.userId,
+    metadata: {
+      userId: payload.userId,
+    },
   });
 
   return { session };
@@ -84,7 +86,7 @@ async function handleSubscriptionCreated({
   const subscriptionId = subscription.id;
   const priceId = subscription.items.data[0].price.id;
 
-  if (!userId && !customerId && !subscriptionId && !priceId) {
+  if (!userId || !customerId || !subscriptionId || !priceId) {
     console.log({ userId, customerId, subscriptionId, priceId });
 
     throw new Error("Missing Required Fields!");
@@ -114,7 +116,7 @@ async function handlePaymentSuccess({
   const subscriptionId = invoice.subscription as string;
   const priceId = invoice.lines.data[0].price.id;
 
-  if (!subscriptionId && !priceId) {
+  if (!subscriptionId || !priceId) {
     console.log({ subscriptionId, priceId });
 
     throw new Error("Missing Required Fields!");
@@ -150,7 +152,7 @@ async function handlePaymentFailure({
 
   const subscriptionId = invoice.subscription as string;
 
-  if (subscriptionId) {
+  if (!subscriptionId) {
     console.log({ subscriptionId });
 
     throw new Error("Missing Required Fields!");
