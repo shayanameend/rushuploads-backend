@@ -35,6 +35,12 @@ async function createCheckoutSession(payload: {
   userId: string;
   priceId: string;
 }) {
+  if (!payload.userId && !payload.priceId) {
+    console.log({ payload });
+
+    throw new Error("Missing Required Fields!");
+  }
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     line_items: [
@@ -45,15 +51,19 @@ async function createCheckoutSession(payload: {
     ],
     success_url: `${env.CLIENT_BASE_URL}${env.STRIPE_SUCCESS_ENDPOINT}`,
     cancel_url: `${env.CLIENT_BASE_URL}${env.STRIPE_CANCEL_ENDPOINT}`,
-    metadata: {
-      userId: payload.userId,
-    },
+    client_reference_id: payload.userId,
   });
 
   return { session };
 }
 
 async function createPortalSession(payload: { customerId: string }) {
+  if (!payload.customerId) {
+    console.log({ payload });
+
+    throw new Error("Missing Required Fields!");
+  }
+
   const session = await stripe.billingPortal.sessions.create({
     customer: payload.customerId,
     return_url: `${env.CLIENT_BASE_URL}${env.STRIPE_RETURN_ENDPOINT}`,
@@ -74,26 +84,26 @@ async function handleSubscriptionCreated({
   const subscriptionId = subscription.id;
   const priceId = subscription.items.data[0].price.id;
 
-  if (userId && customerId && subscriptionId && priceId) {
-    await prisma.subscription.create({
-      data: {
-        subscriptionId,
-        customerId,
-        priceId,
-        status: SubscriptionStatus.PAST_DUE,
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-        user: {
-          connect: {
-            id: userId,
-          },
-        },
-      },
-    });
-  } else {
+  if (!userId && !customerId && !subscriptionId && !priceId) {
     console.log({ userId, customerId, subscriptionId, priceId });
 
     throw new Error("Missing Required Fields!");
   }
+
+  await prisma.subscription.create({
+    data: {
+      subscriptionId,
+      customerId,
+      priceId,
+      status: SubscriptionStatus.PAST_DUE,
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+    },
+  });
 }
 
 async function handlePaymentSuccess({
@@ -104,33 +114,33 @@ async function handlePaymentSuccess({
   const subscriptionId = invoice.subscription as string;
   const priceId = invoice.lines.data[0].price.id;
 
-  if (subscriptionId && priceId) {
-    const tier = PriceIdToTierMap[priceId];
-    const totalStorage = TierConstraints[tier].maxStorage;
-
-    const subscription = await prisma.subscription.update({
-      where: {
-        subscriptionId,
-      },
-      data: {
-        status: SubscriptionStatus.ACTIVE,
-      },
-    });
-
-    await prisma.user.update({
-      where: {
-        id: subscription.userId,
-      },
-      data: {
-        tier,
-        totalStorage,
-      },
-    });
-  } else {
+  if (!subscriptionId && !priceId) {
     console.log({ subscriptionId, priceId });
 
     throw new Error("Missing Required Fields!");
   }
+
+  const tier = PriceIdToTierMap[priceId];
+  const totalStorage = TierConstraints[tier].maxStorage;
+
+  const subscription = await prisma.subscription.update({
+    where: {
+      subscriptionId,
+    },
+    data: {
+      status: SubscriptionStatus.ACTIVE,
+    },
+  });
+
+  await prisma.user.update({
+    where: {
+      id: subscription.userId,
+    },
+    data: {
+      tier,
+      totalStorage,
+    },
+  });
 }
 
 async function handlePaymentFailure({
@@ -141,19 +151,19 @@ async function handlePaymentFailure({
   const subscriptionId = invoice.subscription as string;
 
   if (subscriptionId) {
-    await prisma.subscription.update({
-      where: {
-        subscriptionId,
-      },
-      data: {
-        status: SubscriptionStatus.PAST_DUE,
-      },
-    });
-  } else {
     console.log({ subscriptionId });
 
     throw new Error("Missing Required Fields!");
   }
+
+  await prisma.subscription.update({
+    where: {
+      subscriptionId,
+    },
+    data: {
+      status: SubscriptionStatus.PAST_DUE,
+    },
+  });
 }
 
 async function handleSubscriptionUpdated({
@@ -163,33 +173,33 @@ async function handleSubscriptionUpdated({
 
   const subscriptionId = subscription.id;
 
-  if (subscriptionId) {
-    switch (subscription.status) {
-      case "canceled":
-        await prisma.subscription.update({
-          where: {
-            subscriptionId,
-          },
-          data: {
-            status: SubscriptionStatus.CANCELED,
-          },
-        });
-        break;
-      default:
-        await prisma.subscription.update({
-          where: {
-            subscriptionId,
-          },
-          data: {
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-          },
-        });
-        break;
-    }
-  } else {
+  if (!subscriptionId) {
     console.log({ subscriptionId });
 
     throw new Error("Missing Required Fields!");
+  }
+
+  switch (subscription.status) {
+    case "canceled":
+      await prisma.subscription.update({
+        where: {
+          subscriptionId,
+        },
+        data: {
+          status: SubscriptionStatus.CANCELED,
+        },
+      });
+      break;
+    default:
+      await prisma.subscription.update({
+        where: {
+          subscriptionId,
+        },
+        data: {
+          currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        },
+      });
+      break;
   }
 }
 
