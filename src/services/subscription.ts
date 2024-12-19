@@ -89,6 +89,10 @@ async function handleSubscriptionCreated({
         },
       },
     });
+  } else {
+    console.log({ userId, customerId, subscriptionId, priceId });
+
+    throw new Error("Missing Required Fields!");
   }
 }
 
@@ -122,6 +126,10 @@ async function handlePaymentSuccess({
         totalStorage,
       },
     });
+  } else {
+    console.log({ subscriptionId, priceId });
+
+    throw new Error("Missing Required Fields!");
   }
 }
 
@@ -141,6 +149,10 @@ async function handlePaymentFailure({
         status: SubscriptionStatus.PAST_DUE,
       },
     });
+  } else {
+    console.log({ subscriptionId });
+
+    throw new Error("Missing Required Fields!");
   }
 }
 
@@ -174,6 +186,10 @@ async function handleSubscriptionUpdated({
         });
         break;
     }
+  } else {
+    console.log({ subscriptionId });
+
+    throw new Error("Missing Required Fields!");
   }
 }
 
