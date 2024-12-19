@@ -25,6 +25,7 @@ const envSchema = zod.object({
   STRIPE_PREMIUM_PRICE_ID: zod.string(),
   STRIPE_SUCCESS_ENDPOINT: zod.string(),
   STRIPE_CANCEL_ENDPOINT: zod.string(),
+  STRIPE_RETURN_ENDPOINT: zod.string(),
 });
 
 export const env = envSchema.parse(process.env);

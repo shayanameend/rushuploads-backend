@@ -1,3 +1,7 @@
+import { Tier } from "@prisma/client";
+
+import { env } from "../lib/env";
+
 const TierConstraints = {
   FREE: {
     maxSendSize: 2.5 * 1024 * 1024 * 1024, // 2.5 GB in bytes
@@ -19,4 +23,14 @@ const TierConstraints = {
   },
 };
 
-export { TierConstraints };
+const PriceIdToTierMap = {
+  [env.STRIPE_PRO_PRICE_ID]: Tier.PRO,
+  [env.STRIPE_PREMIUM_PRICE_ID]: Tier.PREMIUM,
+};
+
+const TierToPriceIdMap = {
+  [Tier.PRO]: env.STRIPE_PRO_PRICE_ID,
+  [Tier.PREMIUM]: env.STRIPE_PREMIUM_PRICE_ID,
+};
+
+export { TierConstraints, PriceIdToTierMap, TierToPriceIdMap };

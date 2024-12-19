@@ -7,6 +7,10 @@ import cron from "node-cron";
 
 import { app } from "./app";
 import { cleanupExpiredFiles } from "./jobs/file";
+import {
+  downgradeCancelledSubscriptions,
+  downgradePastDueSubscriptions,
+} from "./jobs/subscriptions";
 import { env } from "./lib/env";
 
 let server: Server;
@@ -29,6 +33,15 @@ server.listen({ port: env.PORT }, () => {
 cron.schedule("0 0 * * *", async () => {
   console.log("Running expired files cleanup task...");
   await cleanupExpiredFiles();
+  console.log("Expired files cleanup task completed.");
+});
+
+cron.schedule("0 0 * * *", async () => {
+  await downgradePastDueSubscriptions();
+});
+
+cron.schedule("0 0 * * *", async () => {
+  await downgradeCancelledSubscriptions();
 });
 
 export { server };

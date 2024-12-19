@@ -1,13 +1,17 @@
 import type { Request, Response } from "express";
 
-import { Tier } from "@prisma/client";
-
+import { TierToPriceIdMap } from "../constants/tiers";
 import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
 import { stripe } from "../lib/stripe";
 import {
   createCheckoutSession,
   createPortalSession,
+  getSubscriptionByUserId,
+  handlePaymentFailure,
+  handlePaymentSuccess,
+  handleSubscriptionCreated,
+  handleSubscriptionUpdated,
 } from "../services/subscription";
 import { createCheckoutQuerySchema } from "../validators/subscription";
 
@@ -15,22 +19,12 @@ async function createCheckout(request: Request, response: Response) {
   try {
     const { tier } = createCheckoutQuerySchema.parse(request.query);
 
-    let priceId: string;
+    const priceId = TierToPriceIdMap[tier];
 
-    switch (tier) {
-      case Tier.PRO:
-        priceId = env.STRIPE_PRO_PRICE_ID;
-        break;
-      case Tier.PREMIUM:
-        priceId = env.STRIPE_PREMIUM_PRICE_ID;
-        break;
-      default:
-        throw new BadResponse("Invalid Tier");
-    }
-
-    const { session } = await createCheckoutSession({ priceId });
-
-    // response.redirect(session.url);
+    const { session } = await createCheckoutSession({
+      userId: request.user.id,
+      priceId,
+    });
 
     return response.created(
       {
@@ -50,15 +44,17 @@ async function createCheckout(request: Request, response: Response) {
 
 async function createPortal(request: Request, response: Response) {
   try {
-    const customerId = "cus_RPwJKpOopURtXt";
+    const { subscription } = await getSubscriptionByUserId({
+      userId: request.user.id,
+    });
 
-    if (!customerId) {
+    if (!subscription?.customerId) {
       throw new BadResponse("Customer Not Found!");
     }
 
-    const { session } = await createPortalSession({ customerId });
-
-    // response.redirect(session.url);
+    const { session } = await createPortalSession({
+      customerId: subscription.customerId,
+    });
 
     return response.created(
       {
@@ -87,37 +83,29 @@ async function stripeWebhook(request: Request, response: Response) {
     );
 
     console.log({ event });
-    console.log({ eventType: event.type });
-    console.log({ eventData: event.data });
 
     switch (event.type) {
-      case "checkout.session.completed":
-        console.log("checkout.session.completed");
-        // Handle checkout.session.completed
+      case "customer.subscription.created":
+        await handleSubscriptionCreated({ event });
         break;
-      case "customer.subscription.updated":
-        console.log("customer.subscription.updated");
-        // Handle customer.subscription.updated
-        break;
-      case "customer.subscription.deleted":
-        console.log("customer.subscription.deleted");
-        // Handle customer.subscription.deleted
-        break;
-      case "invoice.paid":
-        console.log("invoice.paid");
-        // Handle invoice.paid
+      case "invoice.payment_succeeded":
+        await handlePaymentSuccess({ event });
         break;
       case "invoice.payment_failed":
-        console.log("invoice.payment_failed");
-        // Handle invoice.payment_failed
+        await handlePaymentFailure({ event });
+        break;
+      case "customer.subscription.updated":
+        await handleSubscriptionUpdated({ event });
         break;
       default:
-        console.log("Unhandled Event");
+        console.log(`Unhandled 
+          Event: ${event.type}`);
         break;
     }
 
-    return response.success({}, { message: "Webhook Received!" });
+    return response.success({}, { message: "Webhook Processed!" });
   } catch (error) {
+    console.error("Webhook Error:", error);
     return handleErrors({ response, error });
   }
 }
