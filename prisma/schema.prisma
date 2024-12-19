@@ -132,7 +132,7 @@ model Subscription {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   subscriptionId   String             @unique @map("subscription_id")
-  customerId       String             @map("customer_id")
+  customerId       String             @unique @map("customer_id")
   priceId          String             @map("price_id")
   status           SubscriptionStatus
   currentPeriodEnd DateTime           @map("current_period_end")

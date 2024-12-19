@@ -23,6 +23,7 @@ async function createCheckout(request: Request, response: Response) {
 
     const { session } = await createCheckoutSession({
       userId: request.user.id,
+      userEmail: request.user.email,
       priceId,
     });
 
@@ -81,8 +82,6 @@ async function stripeWebhook(request: Request, response: Response) {
       sig,
       env.STRIPE_WEBHOOK_SECRET_KEY,
     );
-
-    console.log({ event });
 
     switch (event.type) {
       case "customer.subscription.created":

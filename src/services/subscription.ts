@@ -33,6 +33,7 @@ async function getSubscriptionByUserId(query: { userId: string }) {
 
 async function createCheckoutSession(payload: {
   userId: string;
+  userEmail: string;
   priceId: string;
 }) {
   if (!payload.userId || !payload.priceId) {
@@ -41,19 +42,28 @@ async function createCheckoutSession(payload: {
     throw new Error("Missing Required Fields!");
   }
 
+  const { subscription } = await getSubscriptionByUserId({
+    userId: payload.userId,
+  });
+
   const session = await stripe.checkout.sessions.create({
+    customer: subscription ? subscription.customerId : undefined,
+    customer_email: !subscription ? payload.userEmail : undefined,
     mode: "subscription",
+    payment_method_types: ["card"],
     line_items: [
       {
         price: payload.priceId,
         quantity: 1,
       },
     ],
+    subscription_data: {
+      metadata: {
+        userId: payload.userId,
+      },
+    },
     success_url: `${env.CLIENT_BASE_URL}${env.STRIPE_SUCCESS_ENDPOINT}`,
     cancel_url: `${env.CLIENT_BASE_URL}${env.STRIPE_CANCEL_ENDPOINT}`,
-    metadata: {
-      userId: payload.userId,
-    },
   });
 
   return { session };
@@ -92,8 +102,18 @@ async function handleSubscriptionCreated({
     throw new Error("Missing Required Fields!");
   }
 
-  await prisma.subscription.create({
-    data: {
+  await prisma.subscription.upsert({
+    where: {
+      userId,
+    },
+    update: {
+      subscriptionId,
+      customerId,
+      priceId,
+      status: SubscriptionStatus.PAST_DUE,
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+    },
+    create: {
       subscriptionId,
       customerId,
       priceId,
