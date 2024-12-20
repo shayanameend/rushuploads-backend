@@ -104,6 +104,10 @@ async function signIn(request: Request, response: Response) {
     });
 
     if (!user.password) {
+      if (password) {
+        throw new BadResponse("Invalid Password!");
+      }
+
       const { otp } = await upsertOTP(
         { userId: user.id },
         { otpType: OtpType.VERIFY_EMAIL },
