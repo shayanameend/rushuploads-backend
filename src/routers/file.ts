@@ -21,7 +21,7 @@ fileRouter.get(
 );
 
 fileRouter.get(
-  "/received",
+  "/recieved",
   verifyRequest({ isVerified: true, role: Role.USER }),
   getUserRecievedFiles,
 );
