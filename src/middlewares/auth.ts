@@ -43,8 +43,6 @@ function verifyRequest({ role, isVerified }: Readonly<VerifyRequestParams>) {
         throw new NotFoundResponse("User Not Found!");
       }
 
-      user.password = undefined;
-
       request.user = user;
 
       next();

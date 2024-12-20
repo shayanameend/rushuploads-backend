@@ -9,8 +9,10 @@ import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
 import { createUser, getUserByEmail, updateUserById } from "../services/user";
 import { signToken } from "../utils/jwt";
 import {
+  resetPasswordSchema,
   signInSchema,
   signUpSchema,
+  updatePasswordSchema,
   verifyOtpSchema,
 } from "../validators/auth";
 
@@ -65,7 +67,7 @@ async function signUp(request: Request, response: Response) {
 
     user.password = undefined;
 
-    response.created(
+    return response.created(
       {
         data: { user, token },
       },
@@ -73,12 +75,8 @@ async function signUp(request: Request, response: Response) {
         message: "Sign Up Successfull!",
       },
     );
-
-    return;
   } catch (error) {
-    handleErrors({ response, error });
-
-    return;
+    return handleErrors({ response, error });
   }
 }
 
@@ -118,7 +116,7 @@ async function signIn(request: Request, response: Response) {
 
       user.password = undefined;
 
-      response.success(
+      return response.success(
         {
           data: { user, token },
         },
@@ -126,8 +124,6 @@ async function signIn(request: Request, response: Response) {
           message: "OTP Sent Successfully!",
         },
       );
-
-      return;
     }
 
     const isPasswordValid = await argon.verify(user.password, password);
@@ -149,7 +145,7 @@ async function signIn(request: Request, response: Response) {
 
       user.password = undefined;
 
-      response.success(
+      return response.success(
         {
           data: { user, token },
         },
@@ -157,13 +153,11 @@ async function signIn(request: Request, response: Response) {
           message: "OTP Sent Successfully!",
         },
       );
-
-      return;
     }
 
     user.password = undefined;
 
-    response.success(
+    return response.success(
       {
         data: { user, token },
       },
@@ -171,35 +165,67 @@ async function signIn(request: Request, response: Response) {
         message: "Sign In Successfull!",
       },
     );
-
-    return;
   } catch (error) {
-    handleErrors({ response, error });
+    return handleErrors({ response, error });
+  }
+}
 
-    return;
+async function resetPassword(request: Request, response: Response) {
+  try {
+    const { email, role } = resetPasswordSchema.parse(request.body);
+
+    const { user } = await getUserByEmail({ email, role });
+
+    if (!user) {
+      throw new NotFoundResponse("User Not Found!");
+    }
+
+    const { otp } = await upsertOTP(
+      { userId: user.id },
+      { otpType: OtpType.RESET_PASSWORD },
+    );
+
+    await sendOTP({
+      to: user.email,
+      code: otp.code,
+    });
+
+    user.password = undefined;
+
+    return response.success(
+      {
+        data: { user },
+      },
+      {
+        message: "OTP Sent Successfully!",
+      },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
   }
 }
 
 async function verifyOtp(request: Request, response: Response) {
   try {
-    const { user } = request;
-
     const { otp, type } = verifyOtpSchema.parse(request.body);
 
-    user.isVerified = true;
+    request.user.isVerified = true;
 
     const token = await signToken({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      tier: user.tier,
-      totalStorage: user.totalStorage,
-      usedStorage: user.usedStorage,
-      isVerified: user.isVerified,
-      updatedAt: user.updatedAt,
+      id: request.user.id,
+      email: request.user.email,
+      role: request.user.role,
+      tier: request.user.tier,
+      totalStorage: request.user.totalStorage,
+      usedStorage: request.user.usedStorage,
+      isVerified: request.user.isVerified,
+      updatedAt: request.user.updatedAt,
     });
 
-    const { otp: existingOtp } = await getOTPByUser({ userId: user.id, type });
+    const { otp: existingOtp } = await getOTPByUser({
+      userId: request.user.id,
+      type,
+    });
 
     if (!existingOtp) {
       throw new BadResponse("Invalid OTP!");
@@ -209,27 +235,49 @@ async function verifyOtp(request: Request, response: Response) {
       throw new BadResponse("Invalid OTP!");
     }
 
-    if (type === OtpType.VERIFY_EMAIL) {
-      await updateUserById({ id: user.id }, { isVerified: true });
+    if (request.user.password && type === OtpType.VERIFY_EMAIL) {
+      await updateUserById({ id: request.user.id }, { isVerified: true });
     }
 
-    await deleteOTPByUser({ userId: user.id, type });
+    await deleteOTPByUser({ userId: request.user.id, type });
 
-    response.success(
+    return response.success(
       {
-        data: { user, token },
+        data: { user: request.user, token },
       },
       {
         message: "OTP Verified Successfully!",
       },
     );
-
-    return;
   } catch (error) {
-    handleErrors({ response, error });
-
-    return;
+    return handleErrors({ response, error });
   }
 }
 
-export { signUp, signIn, verifyOtp };
+async function updatePassword(request: Request, response: Response) {
+  try {
+    const { password } = updatePasswordSchema.parse(request.body);
+
+    const hashedPassword = await argon.hash(password);
+
+    const { user } = await updateUserById(
+      { id: request.user.id },
+      { password: hashedPassword, isVerified: true },
+    );
+
+    user.password = undefined;
+
+    return response.success(
+      {
+        data: { user },
+      },
+      {
+        message: "Password Updated Successfully!",
+      },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
+export { signUp, signIn, resetPassword, verifyOtp, updatePassword };

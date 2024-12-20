@@ -24,7 +24,7 @@ const signUpSchema = zod.object({
     .enum([Role.USER, Role.ADMIN], {
       message: "Role must be either 'USER' or 'ADMIN'",
     })
-    .optional(),
+    .default(Role.USER),
 });
 
 const signInSchema = zod.object({
@@ -50,7 +50,22 @@ const signInSchema = zod.object({
     .enum([Role.USER, Role.ADMIN], {
       message: "Role must be either 'USER' or 'ADMIN'",
     })
-    .optional(),
+    .default(Role.USER),
+});
+
+const resetPasswordSchema = zod.object({
+  email: zod
+    .string({
+      message: "Invalid Email",
+    })
+    .email({
+      message: "Invalid Email",
+    }),
+  role: zod
+    .enum([Role.USER, Role.ADMIN], {
+      message: "Role must be either 'USER' or 'ADMIN'",
+    })
+    .default(Role.USER),
 });
 
 const verifyOtpSchema = zod.object({
@@ -65,7 +80,26 @@ const verifyOtpSchema = zod.object({
     .enum([OtpType.VERIFY_EMAIL, OtpType.RESET_PASSWORD], {
       message: "Invalid Type",
     })
-    .optional(),
+    .default(OtpType.VERIFY_EMAIL),
 });
 
-export { signUpSchema, signInSchema, verifyOtpSchema };
+const updatePasswordSchema = zod.object({
+  password: zod
+    .string({
+      message: "Invalid Password",
+    })
+    .min(8, {
+      message: "Password must be at least 8 characters long",
+    })
+    .max(32, {
+      message: "Password must be at most 32 characters long",
+    }),
+});
+
+export {
+  signUpSchema,
+  signInSchema,
+  resetPasswordSchema,
+  verifyOtpSchema,
+  updatePasswordSchema,
+};
