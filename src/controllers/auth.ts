@@ -130,6 +130,10 @@ async function signIn(request: Request, response: Response) {
       );
     }
 
+    if (!password) {
+      throw new BadResponse("Invalid Password!");
+    }
+
     const isPasswordValid = await argon.verify(user.password, password);
 
     if (!isPasswordValid) {
@@ -184,7 +188,7 @@ async function resetPassword(request: Request, response: Response) {
       throw new NotFoundResponse("User Not Found!");
     }
 
-    user.isVerified = user.password ? user.isVerified : false;
+    user.isVerified = false;
 
     const token = await signToken({
       id: user.id,
