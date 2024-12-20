@@ -209,6 +209,26 @@ async function resetPassword(request: Request, response: Response) {
   }
 }
 
+async function resendOtp(request: Request, response: Response) {
+  try {
+    const { otp } = await upsertOTP({ userId: request.user.id }, {});
+
+    await sendOTP({
+      to: request.user.email,
+      code: otp.code,
+    });
+
+    return response.success(
+      {},
+      {
+        message: "OTP Sent Successfully!",
+      },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
 async function verifyOtp(request: Request, response: Response) {
   try {
     const { otp, type } = verifyOtpSchema.parse(request.body);
@@ -284,4 +304,4 @@ async function updatePassword(request: Request, response: Response) {
   }
 }
 
-export { signUp, signIn, resetPassword, verifyOtp, updatePassword };
+export { signUp, signIn, resetPassword, resendOtp, verifyOtp, updatePassword };
