@@ -65,11 +65,9 @@ async function signUp(request: Request, response: Response) {
       code: otp.code,
     });
 
-    user.password = undefined;
-
     return response.created(
       {
-        data: { user, token },
+        data: { token },
       },
       {
         message: "Sign Up Successfull!",
@@ -151,11 +149,9 @@ async function signIn(request: Request, response: Response) {
         code: otp.code,
       });
 
-      user.password = undefined;
-
       return response.success(
         {
-          data: { user, token },
+          data: { token },
         },
         {
           message: "OTP Sent Successfully!",
@@ -211,11 +207,9 @@ async function resetPassword(request: Request, response: Response) {
       code: otp.code,
     });
 
-    user.password = undefined;
-
     return response.success(
       {
-        data: { user, token },
+        data: { token },
       },
       {
         message: "OTP Sent Successfully!",
@@ -282,6 +276,8 @@ async function verifyOtp(request: Request, response: Response) {
 
     await deleteOTPByUser({ userId: request.user.id, type });
 
+    request.user.password = undefined;
+
     return response.success(
       {
         data: { user: request.user, token },
@@ -321,4 +317,43 @@ async function updatePassword(request: Request, response: Response) {
   }
 }
 
-export { signUp, signIn, resetPassword, resendOtp, verifyOtp, updatePassword };
+async function refresh(request: Request, response: Response) {
+  try {
+    const token = await signToken({
+      id: request.user.id,
+      email: request.user.email,
+      role: request.user.role,
+      tier: request.user.tier,
+      totalStorage: request.user.totalStorage,
+      usedStorage: request.user.usedStorage,
+      isVerified: request.user.isVerified,
+      updatedAt: request.user.updatedAt,
+    });
+
+    request.user.password = undefined;
+
+    return response.success(
+      {
+        data: {
+          user: request.user,
+          token,
+        },
+      },
+      {
+        message: "Token Refreshed Successfully!",
+      },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
+export {
+  signUp,
+  signIn,
+  resetPassword,
+  resendOtp,
+  verifyOtp,
+  updatePassword,
+  refresh,
+};

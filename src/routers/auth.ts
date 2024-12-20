@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import {
+  refresh,
   resendOtp,
   resetPassword,
   signIn,
@@ -40,6 +41,14 @@ authRouter.post(
     isVerified: true,
   }),
   updatePassword,
+);
+
+authRouter.post(
+  "/refresh",
+  verifyRequest({
+    isVerified: true,
+  }),
+  refresh,
 );
 
 export { authRouter };
