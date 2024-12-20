@@ -6,10 +6,10 @@ import { createServer as createHttpsServer } from "node:https";
 import cron from "node-cron";
 
 import { app } from "./app";
-import { cleanupExpiredFiles } from "./jobs/file";
+import { cleanupFiles, markExpiredFiles } from "./jobs/file";
 import {
-  downgradeCancelledSubscriptions,
-  downgradePastDueSubscriptions,
+  deleteFilesOfNonActiveSubscriptions,
+  downgradeNonActiveSubscriptions,
 } from "./jobs/subscriptions";
 import { env } from "./lib/env";
 
@@ -31,17 +31,29 @@ server.listen({ port: env.PORT }, () => {
 });
 
 cron.schedule("0 0 * * *", async () => {
-  console.log("Running expired files cleanup task...");
-  await cleanupExpiredFiles();
-  console.log("Expired files cleanup task completed.");
+  console.log("Running cron job to mark expired files...");
+  await markExpiredFiles();
+  console.log("Cron job to cleanup files completed!");
+
+  console.log("Running cron job to cleanup files...");
+  await cleanupFiles();
+  console.log("Cron job to cleanup files completed!");
 });
 
 cron.schedule("0 0 * * *", async () => {
-  await downgradePastDueSubscriptions();
+  console.log("Running cron job to downgrade non active subscriptions...");
+  await downgradeNonActiveSubscriptions();
+  console.log("Cron job to downgrade non active subscriptions completed!");
 });
 
 cron.schedule("0 0 * * *", async () => {
-  await downgradeCancelledSubscriptions();
+  console.log(
+    "Running cron job to delete files of non active subscriptions...",
+  );
+  await deleteFilesOfNonActiveSubscriptions();
+  console.log(
+    "Cron job to delete files of non active subscriptions completed!",
+  );
 });
 
 export { server };

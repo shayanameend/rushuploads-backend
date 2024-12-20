@@ -6,6 +6,7 @@ import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
 import {
   createFiles,
+  getFilesBySharedToUserId,
   getFilesByUserId,
   removeFile,
   updateFileById,
@@ -20,6 +21,76 @@ import {
   getLinkParamsSchema,
   sendFileMailBodySchema,
 } from "../validators/file";
+
+async function getUserSharedFiles(request: Request, response: Response) {
+  try {
+    const { files } = await getFilesByUserId({ userId: request.user?.id });
+
+    const augmentedFiles = files.map((file) => ({
+      ...file,
+      url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
+    }));
+
+    response.success(
+      {
+        data: { files: augmentedFiles },
+      },
+      { message: "Files Fetched Successfully!" },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
+async function getUserRecievedFiles(request: Request, response: Response) {
+  try {
+    const { files } = await getFilesBySharedToUserId({
+      userId: request.user?.id,
+    });
+
+    const augmentedFiles = files.map((file) => ({
+      ...file,
+      url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
+    }));
+
+    response.success(
+      {
+        data: { files: augmentedFiles },
+      },
+      { message: "Files Fetched Successfully!" },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
+async function getLink(request: Request, response: Response) {
+  try {
+    const { linkId } = getLinkParamsSchema.parse(request.params);
+
+    const { link } = await getLinkById({ id: linkId });
+
+    if (!link) {
+      throw new BadResponse("Link Not Found!");
+    }
+
+    const augmentedFiles = link.files.map((file) => ({
+      ...file,
+      url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
+    }));
+
+    link.files = augmentedFiles;
+
+    response.success(
+      {
+        data: { link },
+      },
+      { message: "Link Fetched Successfully!" },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
 
 async function generateFileLink(request: Request, response: Response) {
   try {
@@ -169,54 +240,6 @@ async function sendFileMail(request: Request, response: Response) {
   }
 }
 
-async function getUserFiles(request: Request, response: Response) {
-  try {
-    const { files } = await getFilesByUserId({ userId: request.user?.id });
-
-    const augmentedFiles = files.map((file) => ({
-      ...file,
-      url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
-    }));
-
-    response.success(
-      {
-        data: { files: augmentedFiles },
-      },
-      { message: "Files Fetched Successfully!" },
-    );
-  } catch (error) {
-    return handleErrors({ response, error });
-  }
-}
-
-async function getLink(request: Request, response: Response) {
-  try {
-    const { linkId } = getLinkParamsSchema.parse(request.params);
-
-    const { link } = await getLinkById({ id: linkId });
-
-    if (!link) {
-      throw new BadResponse("Link Not Found!");
-    }
-
-    const augmentedFiles = link.files.map((file) => ({
-      ...file,
-      url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
-    }));
-
-    link.files = augmentedFiles;
-
-    response.success(
-      {
-        data: { link },
-      },
-      { message: "Link Fetched Successfully!" },
-    );
-  } catch (error) {
-    return handleErrors({ response, error });
-  }
-}
-
 async function deleteFile(request: Request, response: Response) {
   try {
     const { fileId } = deleteFileParamsSchema.parse(request.params);
@@ -230,15 +253,20 @@ async function deleteFile(request: Request, response: Response) {
       throw new BadResponse("File Not Found!");
     }
 
-    await removeFile({ key: file.name });
-
     response.success({ file }, { message: "File Deleted Successfully!" });
   } catch (error) {
     return handleErrors({ response, error });
   }
 }
 
-export { generateFileLink, sendFileMail, getUserFiles, getLink, deleteFile };
+export {
+  generateFileLink,
+  sendFileMail,
+  getUserSharedFiles,
+  getUserRecievedFiles,
+  getLink,
+  deleteFile,
+};
 
 function validateFileConstraints({
   userTier,

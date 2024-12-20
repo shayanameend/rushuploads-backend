@@ -1,18 +1,38 @@
 import { prisma } from "../lib/prisma";
 import { removeFile } from "../services/file";
 
-async function cleanupExpiredFiles() {
+async function markExpiredFiles() {
   const now = new Date();
 
-  const expiredFiles = await prisma.file.findMany({
+  const expiredFiles = await prisma.file.updateMany({
     where: {
       expiredAt: {
         lte: now,
       },
     },
+    data: {
+      isExpired: true,
+    },
   });
 
-  for (const file of expiredFiles) {
+  console.log(`${expiredFiles.count} files expired.`);
+}
+
+async function cleanupFiles() {
+  const files = await prisma.file.findMany({
+    where: {
+      OR: [
+        {
+          isExpired: true,
+        },
+        {
+          isDeleted: true,
+        },
+      ],
+    },
+  });
+
+  for (const file of files) {
     try {
       await removeFile({ key: file.name });
 
@@ -22,18 +42,7 @@ async function cleanupExpiredFiles() {
     }
   }
 
-  await prisma.file.updateMany({
-    where: {
-      id: {
-        in: expiredFiles.map((file) => file.id),
-      },
-    },
-    data: {
-      isExpired: true,
-    },
-  });
-
-  console.log(`${expiredFiles.length} expired files cleaned up.`);
+  console.log(`${files.length} files cleaned up.`);
 }
 
-export { cleanupExpiredFiles };
+export { markExpiredFiles, cleanupFiles };

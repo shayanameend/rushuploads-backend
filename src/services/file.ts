@@ -45,9 +45,44 @@ async function getFilesByUserId(query: {
 }) {
   const files = await prisma.file.findMany({
     where: {
-      userId: query.userId,
       type: query.type,
       isDeleted: false,
+      user: {
+        id: query.userId,
+      },
+    },
+    select: {
+      id: true,
+      originalName: true,
+      name: true,
+      type: true,
+      isExpired: true,
+      expiredAt: true,
+      updatedAt: true,
+      user: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  });
+
+  return { files };
+}
+
+async function getFilesBySharedToUserId(query: {
+  userId: string;
+  type?: string;
+}) {
+  const files = await prisma.file.findMany({
+    where: {
+      type: query.type,
+      isDeleted: false,
+      sharedToUsers: {
+        some: {
+          id: query.userId,
+        },
+      },
     },
     select: {
       id: true,
@@ -146,6 +181,7 @@ export {
   uploadFiles,
   removeFile,
   getFilesByUserId,
+  getFilesBySharedToUserId,
   createFiles,
   updateFileById,
 };
