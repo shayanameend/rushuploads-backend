@@ -107,6 +107,7 @@ async function createFiles(payload: {
   userId: string;
   expiresAt: Date;
   rawFiles: Express.Multer.File[];
+  sharedToUserIds: string[];
 }) {
   const files = await prisma.$transaction(
     payload.rawFiles.map((file) =>
@@ -116,6 +117,11 @@ async function createFiles(payload: {
           name: file.filename,
           type: file.mimetype,
           expiredAt: payload.expiresAt,
+          sharedToUsers: {
+            connect: payload.sharedToUserIds.map((userId) => ({
+              id: userId,
+            })),
+          },
           user: {
             connect: {
               id: payload.userId,

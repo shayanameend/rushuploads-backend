@@ -125,6 +125,7 @@ async function generateFileLink(request: Request, response: Response) {
         userId: request.user.id,
         expiresAt,
         rawFiles,
+        sharedToUserIds: [],
       }),
 
       updateUserById(
@@ -197,6 +198,7 @@ async function sendFileMail(request: Request, response: Response) {
         userId: request.user.id,
         expiresAt,
         rawFiles,
+        sharedToUserIds: to,
       }),
 
       updateUserById(
