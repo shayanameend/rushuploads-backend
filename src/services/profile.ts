@@ -38,6 +38,17 @@ async function createProfile(payload: {
         },
       },
     },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      updatedAt: true,
+      user: {
+        select: {
+          email: true,
+        },
+      },
+    },
   });
 
   return { profile };
@@ -56,6 +67,17 @@ async function updateProfile(
     data: {
       firstName: payload.firstName,
       lastName: payload.lastName,
+    },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      updatedAt: true,
+      user: {
+        select: {
+          email: true,
+        },
+      },
     },
   });
 
