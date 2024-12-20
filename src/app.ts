@@ -8,6 +8,7 @@ import { verifyRequest } from "./middlewares/auth";
 import { expandResponse } from "./middlewares/response";
 import { authRouter } from "./routers/auth";
 import { fileRouter } from "./routers/file";
+import { profileRouter } from "./routers/profile";
 import { subscriptionRouter } from "./routers/subscription";
 import { userRouter } from "./routers/user";
 
@@ -23,6 +24,7 @@ app.use(expandResponse);
 
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
+app.use("/profiles", profileRouter);
 app.use("/files", fileRouter);
 app.use("/subscriptions", subscriptionRouter);
 

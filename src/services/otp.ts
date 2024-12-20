@@ -4,7 +4,7 @@ import { prisma } from "../lib/prisma";
 
 async function upsertOTP(
   query: { userId: string },
-  payload: { otpType: OtpType },
+  payload: { otpType?: OtpType },
 ) {
   const sampleSpace = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 

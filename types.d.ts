@@ -25,6 +25,7 @@ declare global {
       user?: {
         id: string;
         email: string;
+        password: string;
         role: Role;
         tier: Tier;
         totalStorage: number;
