@@ -8,13 +8,12 @@ import {
   createFiles,
   getFilesBySharedToUserId,
   getFilesByUserId,
-  removeFile,
   updateFileById,
   uploadFiles,
 } from "../services/file";
 import { createLink, getLinkById } from "../services/link";
 import { createMail, sendFiles } from "../services/mail";
-import { updateUserById } from "../services/user";
+import { updateUserById, upsertUserByEmail } from "../services/user";
 import {
   deleteFileParamsSchema,
   generateFileLinkBodySchema,
@@ -191,6 +190,10 @@ async function sendFileMail(request: Request, response: Response) {
 
     const expiresAt = new Date(Date.now() + expiresInMs);
 
+    const users = await Promise.all(
+      to.map((email) => upsertUserByEmail({ email }, {})),
+    );
+
     const [_p1, p2, _p3] = await Promise.all([
       uploadFiles({ rawFiles }),
 
@@ -198,7 +201,7 @@ async function sendFileMail(request: Request, response: Response) {
         userId: request.user.id,
         expiresAt,
         rawFiles,
-        sharedToUserIds: to,
+        sharedToUserIds: users.map(({ user }) => user.id),
       }),
 
       updateUserById(

@@ -91,8 +91,8 @@ async function getUsers(
 
 async function createUser(payload: {
   email: string;
-  password: string;
-  role: Role;
+  password?: string;
+  role?: Role;
 }) {
   const user = await prisma.user.create({
     data: {
@@ -172,6 +172,38 @@ async function updateUserByEmail(
   return { user };
 }
 
+async function upsertUserByEmail(
+  query: { email: string; role?: Role },
+  payload: Prisma.UserUpdateInput,
+) {
+  const user = await prisma.user.upsert({
+    where: {
+      email: query.email,
+      role: query.role,
+    },
+    update: payload,
+    create: {
+      email: query.email,
+      role: query.role,
+      totalStorage: TierConstraints.FREE.maxStorage,
+      usedStorage: 0,
+    },
+    select: {
+      id: true,
+      email: true,
+      password: true,
+      role: true,
+      tier: true,
+      totalStorage: true,
+      usedStorage: true,
+      isVerified: true,
+      updatedAt: true,
+    },
+  });
+
+  return { user };
+}
+
 async function deleteUserById(query: { id: string; role?: Role }) {
   const { user } = await updateUserById(query, {
     isDeleted: true,
@@ -195,6 +227,7 @@ export {
   createUser,
   updateUserById,
   updateUserByEmail,
+  upsertUserByEmail,
   deleteUserById,
   deleteUserByEmail,
 };
