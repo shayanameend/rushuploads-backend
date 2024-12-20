@@ -184,6 +184,19 @@ async function resetPassword(request: Request, response: Response) {
       throw new NotFoundResponse("User Not Found!");
     }
 
+    user.isVerified = user.password ? user.isVerified : false;
+
+    const token = await signToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      tier: user.tier,
+      totalStorage: user.totalStorage,
+      usedStorage: user.usedStorage,
+      isVerified: user.isVerified,
+      updatedAt: user.updatedAt,
+    });
+
     const { otp } = await upsertOTP(
       { userId: user.id },
       { otpType: OtpType.RESET_PASSWORD },
@@ -198,7 +211,7 @@ async function resetPassword(request: Request, response: Response) {
 
     return response.success(
       {
-        data: { user },
+        data: { user, token },
       },
       {
         message: "OTP Sent Successfully!",
