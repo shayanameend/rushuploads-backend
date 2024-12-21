@@ -6,8 +6,8 @@ import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
 import {
   createFiles,
-  getFilesBySharedToUserId,
   getFilesByUserId,
+  getSharedFilesByUserId,
   updateFileById,
   uploadFiles,
 } from "../services/file";
@@ -43,7 +43,7 @@ async function getUserSharedFiles(request: Request, response: Response) {
 
 async function getUserReceivedFiles(request: Request, response: Response) {
   try {
-    const { files } = await getFilesBySharedToUserId({
+    const { files } = await getSharedFilesByUserId({
       userId: request.user?.id,
     });
 

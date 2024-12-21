@@ -57,6 +57,7 @@ async function getFilesByUserId(query: {
       name: true,
       type: true,
       isExpired: true,
+      isDeleted: true,
       expiredAt: true,
       updatedAt: true,
       user: {
@@ -70,37 +71,42 @@ async function getFilesByUserId(query: {
   return { files };
 }
 
-async function getFilesBySharedToUserId(query: {
+async function getSharedFilesByUserId(query: {
   userId: string;
   type?: string;
 }) {
-  const files = await prisma.file.findMany({
+  const user = await prisma.user.findUnique({
     where: {
-      type: query.type,
-      isDeleted: false,
-      sharedToUsers: {
-        some: {
-          id: query.userId,
+      id: query.userId,
+      sharedFiles: {
+        every: {
+          type: query.type,
+          isDeleted: false,
         },
       },
     },
     select: {
-      id: true,
-      originalName: true,
-      name: true,
-      type: true,
-      isExpired: true,
-      expiredAt: true,
-      updatedAt: true,
-      user: {
+      sharedFiles: {
         select: {
-          email: true,
+          id: true,
+          originalName: true,
+          name: true,
+          type: true,
+          isExpired: true,
+          isDeleted: true,
+          expiredAt: true,
+          updatedAt: true,
+          user: {
+            select: {
+              email: true,
+            },
+          },
         },
       },
     },
   });
 
-  return { files };
+  return { files: user?.sharedFiles ?? [] };
 }
 
 async function createFiles(payload: {
@@ -134,6 +140,7 @@ async function createFiles(payload: {
           name: true,
           type: true,
           isExpired: true,
+          isDeleted: true,
           expiredAt: true,
           updatedAt: true,
           user: {
@@ -170,6 +177,7 @@ async function updateFileById(
       name: true,
       type: true,
       isExpired: true,
+      isDeleted: true,
       expiredAt: true,
       updatedAt: true,
       user: {
@@ -187,7 +195,7 @@ export {
   uploadFiles,
   removeFile,
   getFilesByUserId,
-  getFilesBySharedToUserId,
+  getSharedFilesByUserId,
   createFiles,
   updateFileById,
 };
