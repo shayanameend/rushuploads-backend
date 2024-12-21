@@ -11,6 +11,7 @@ import {
   handlePaymentFailure,
   handlePaymentSuccess,
   handleSubscriptionCreated,
+  handleSubscriptionDeleted,
   handleSubscriptionUpdated,
 } from "../services/subscription";
 import { createCheckoutQuerySchema } from "../validators/subscription";
@@ -95,6 +96,9 @@ async function stripeWebhook(request: Request, response: Response) {
         break;
       case "customer.subscription.updated":
         await handleSubscriptionUpdated({ event });
+        break;
+      case "customer.subscription.deleted":
+        await handleSubscriptionDeleted({ event });
         break;
       default:
         console.log(`Unhandled Event: ${event.type}`);
