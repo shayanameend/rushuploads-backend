@@ -109,6 +109,38 @@ async function getSharedFilesByUserId(query: {
   return { files: user?.sharedFiles ?? [] };
 }
 
+async function getExpiredFilesByUserId(query: {
+  userId: string;
+  type?: string;
+}) {
+  const files = await prisma.file.findMany({
+    where: {
+      type: query.type,
+      isExpired: true,
+      user: {
+        id: query.userId,
+      },
+    },
+    select: {
+      id: true,
+      originalName: true,
+      name: true,
+      type: true,
+      isExpired: true,
+      isDeleted: true,
+      expiredAt: true,
+      updatedAt: true,
+      user: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  });
+
+  return { files };
+}
+
 async function createFiles(payload: {
   userId: string;
   expiresAt: Date;
@@ -196,6 +228,7 @@ export {
   removeFile,
   getFilesByUserId,
   getSharedFilesByUserId,
+  getExpiredFilesByUserId,
   createFiles,
   updateFileById,
 };

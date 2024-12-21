@@ -1,6 +1,39 @@
 import { nodemailerTransporter } from "../lib/nodemailer";
 import { prisma } from "../lib/prisma";
 
+async function getMails(payload: { userId: string }) {
+  const mails = await prisma.mail.findMany({
+    where: {
+      userId: payload.userId,
+    },
+    select: {
+      id: true,
+      to: true,
+      title: true,
+      message: true,
+      updatedAt: true,
+      files: {
+        select: {
+          id: true,
+          originalName: true,
+          name: true,
+          type: true,
+          isExpired: true,
+          expiredAt: true,
+          updatedAt: true,
+        },
+      },
+      user: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  });
+
+  return { mails };
+}
+
 async function createMail(payload: {
   to: string[];
   title?: string;
@@ -113,4 +146,4 @@ async function sendFiles({
   );
 }
 
-export { createMail, sendOTP, sendFiles };
+export { createMail, sendOTP, sendFiles, getMails };

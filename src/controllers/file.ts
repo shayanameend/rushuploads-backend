@@ -6,13 +6,14 @@ import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
 import {
   createFiles,
+  getExpiredFilesByUserId,
   getFilesByUserId,
   getSharedFilesByUserId,
   updateFileById,
   uploadFiles,
 } from "../services/file";
-import { createLink, getLinkById } from "../services/link";
-import { createMail, sendFiles } from "../services/mail";
+import { createLink, getLinkById, getLinks } from "../services/link";
+import { createMail, getMails, sendFiles } from "../services/mail";
 import { updateUserById, upsertUserByEmail } from "../services/user";
 import {
   deleteFileParamsSchema,
@@ -23,7 +24,7 @@ import {
 
 async function getUserSharedFiles(request: Request, response: Response) {
   try {
-    const { files } = await getFilesByUserId({ userId: request.user?.id });
+    const { files } = await getFilesByUserId({ userId: request.user.id });
 
     const augmentedFiles = files.map((file) => ({
       ...file,
@@ -44,7 +45,7 @@ async function getUserSharedFiles(request: Request, response: Response) {
 async function getUserReceivedFiles(request: Request, response: Response) {
   try {
     const { files } = await getSharedFilesByUserId({
-      userId: request.user?.id,
+      userId: request.user.id,
     });
 
     const augmentedFiles = files.map((file) => ({
@@ -57,6 +58,58 @@ async function getUserReceivedFiles(request: Request, response: Response) {
         data: { files: augmentedFiles },
       },
       { message: "Files Fetched Successfully!" },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
+async function getExpiredFiles(request: Request, response: Response) {
+  try {
+    const { files } = await getExpiredFilesByUserId({
+      userId: request.user.id,
+    });
+
+    const augmentedFiles = files.map((file) => ({
+      ...file,
+      url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
+    }));
+
+    response.success(
+      {
+        data: { files: augmentedFiles },
+      },
+      { message: "Files Fetched Successfully!" },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
+async function getAllLinks(request: Request, response: Response) {
+  try {
+    const { links } = await getLinks({ userId: request.user.id });
+
+    response.success(
+      {
+        data: { links },
+      },
+      { message: "Links Fetched Successfully!" },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
+async function getAllMails(request: Request, response: Response) {
+  try {
+    const { mails } = await getMails({ userId: request.user.id });
+
+    response.success(
+      {
+        data: { mails },
+      },
+      { message: "Mails Fetched Successfully!" },
     );
   } catch (error) {
     return handleErrors({ response, error });
@@ -265,11 +318,14 @@ async function deleteFile(request: Request, response: Response) {
 }
 
 export {
-  generateFileLink,
-  sendFileMail,
   getUserSharedFiles,
   getUserReceivedFiles,
+  getExpiredFiles,
+  getAllLinks,
+  getAllMails,
   getLink,
+  generateFileLink,
+  sendFileMail,
   deleteFile,
 };
 

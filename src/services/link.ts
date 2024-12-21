@@ -1,5 +1,32 @@
 import { prisma } from "../lib/prisma";
 
+async function getLinks(query: { userId: string }) {
+  const links = await prisma.link.findMany({
+    where: {
+      userId: query.userId,
+    },
+    select: {
+      id: true,
+      title: true,
+      message: true,
+      updatedAt: true,
+      files: {
+        select: {
+          id: true,
+          originalName: true,
+          name: true,
+          type: true,
+          isExpired: true,
+          expiredAt: true,
+          updatedAt: true,
+        },
+      },
+    },
+  });
+
+  return { links };
+}
+
 async function createLink(payload: {
   title?: string;
   message?: string;
@@ -76,4 +103,4 @@ async function getLinkById(query: { id: string }) {
   return { link };
 }
 
-export { createLink, getLinkById };
+export { createLink, getLinkById, getLinks };
