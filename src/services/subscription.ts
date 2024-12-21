@@ -225,6 +225,29 @@ async function handleSubscriptionUpdated({
   }
 }
 
+async function handleSubscriptionDeleted({
+  event,
+}: { event: Stripe.CustomerSubscriptionDeletedEvent }) {
+  const subscription = event.data.object;
+
+  const subscriptionId = subscription.id;
+
+  if (!subscriptionId) {
+    console.log({ subscriptionId });
+
+    throw new Error("Missing Required Fields!");
+  }
+
+  await prisma.subscription.update({
+    where: {
+      subscriptionId,
+    },
+    data: {
+      status: SubscriptionStatus.CANCELED,
+    },
+  });
+}
+
 export {
   getSubscriptionByUserId,
   createCheckoutSession,
@@ -233,4 +256,5 @@ export {
   handlePaymentSuccess,
   handlePaymentFailure,
   handleSubscriptionUpdated,
+  handleSubscriptionDeleted,
 };
