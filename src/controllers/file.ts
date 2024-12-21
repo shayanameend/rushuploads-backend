@@ -41,7 +41,7 @@ async function getUserSharedFiles(request: Request, response: Response) {
   }
 }
 
-async function getUserRecievedFiles(request: Request, response: Response) {
+async function getUserReceivedFiles(request: Request, response: Response) {
   try {
     const { files } = await getFilesBySharedToUserId({
       userId: request.user?.id,
@@ -268,7 +268,7 @@ export {
   generateFileLink,
   sendFileMail,
   getUserSharedFiles,
-  getUserRecievedFiles,
+  getUserReceivedFiles,
   getLink,
   deleteFile,
 };

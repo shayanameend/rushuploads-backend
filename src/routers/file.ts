@@ -5,7 +5,7 @@ import {
   deleteFile,
   generateFileLink,
   getLink,
-  getUserRecievedFiles,
+  getUserReceivedFiles,
   getUserSharedFiles,
   sendFileMail,
 } from "../controllers/file";
@@ -21,9 +21,9 @@ fileRouter.get(
 );
 
 fileRouter.get(
-  "/recieved",
+  "/received",
   verifyRequest({ isVerified: true, role: Role.USER }),
-  getUserRecievedFiles,
+  getUserReceivedFiles,
 );
 
 fileRouter.get(
