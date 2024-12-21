@@ -44,7 +44,7 @@ function handleErrors({
     response.badRequest(
       {},
       {
-        message: "Invalid Data!",
+        message: error.errors[0].message,
       },
     );
 
