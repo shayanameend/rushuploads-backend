@@ -25,8 +25,8 @@ model User {
   password     String?
   role         Role    @default(USER)
   tier         Tier    @default(FREE)
-  totalStorage Float   @map("total_storage")
-  usedStorage  Float   @map("used_storage")
+  totalStorage Int     @map("total_storage")
+  usedStorage  Int     @map("used_storage")
   isVerified   Boolean @default(false) @map("is_verified")
   isDeleted    Boolean @default(false) @map("is_deleted")
 

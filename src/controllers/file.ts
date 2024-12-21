@@ -1,7 +1,5 @@
-import type { Tier } from "@prisma/client";
 import type { Request, Response } from "express";
 
-import { TierConstraints } from "../constants/tiers";
 import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
 import {
@@ -14,6 +12,7 @@ import {
 import { createLink, getLinkById } from "../services/link";
 import { createMail, sendFiles } from "../services/mail";
 import { updateUserById, upsertUserByEmail } from "../services/user";
+import { validateFileConstraints } from "../utils/file";
 import {
   deleteFileParamsSchema,
   generateFileLinkBodySchema,
@@ -112,7 +111,7 @@ async function generateFileLink(request: Request, response: Response) {
       userTier,
       totalFileSize,
       expiresInMs,
-      remainingStorage: request.user.totalStorage - request.user.usedStorage,
+      usedStorage: request.user.usedStorage,
     });
 
     const expiresAt = new Date(Date.now() + expiresInMs);
@@ -185,7 +184,7 @@ async function sendFileMail(request: Request, response: Response) {
       userTier,
       totalFileSize,
       expiresInMs,
-      remainingStorage: request.user.totalStorage - request.user.usedStorage,
+      usedStorage: request.user.usedStorage,
     });
 
     const expiresAt = new Date(Date.now() + expiresInMs);
@@ -272,46 +271,3 @@ export {
   getLink,
   deleteFile,
 };
-
-function validateFileConstraints({
-  userTier,
-  totalFileSize,
-  expiresInMs,
-  remainingStorage,
-}: {
-  userTier: Tier;
-  totalFileSize: number;
-  expiresInMs: number;
-  remainingStorage: number;
-}) {
-  const tierConstraints = TierConstraints[userTier];
-
-  if (totalFileSize > tierConstraints.maxSendSize) {
-    throw new BadResponse(
-      `File size limit exceeded! Max allowed is ${
-        tierConstraints.maxSendSize / (1024 * 1024 * 1024)
-      } GB for your tier.`,
-    );
-  }
-
-  if (remainingStorage < totalFileSize) {
-    throw new BadResponse(
-      `Not enough storage! You have ${
-        remainingStorage / (1024 * 1024 * 1024)
-      } GB remaining.`,
-    );
-  }
-
-  if (
-    expiresInMs < tierConstraints.minExpiry ||
-    expiresInMs > tierConstraints.maxExpiry
-  ) {
-    throw new BadResponse(
-      `Expiry must be between ${
-        tierConstraints.minExpiry / (24 * 60 * 60 * 1000)
-      } and ${
-        tierConstraints.maxExpiry / (24 * 60 * 60 * 1000)
-      } days for your tier.`,
-    );
-  }
-}

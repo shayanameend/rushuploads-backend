@@ -3,15 +3,23 @@ import type { Tier } from "@prisma/client";
 import { TierConstraints } from "../constants/tiers";
 import { BadResponse } from "../lib/error";
 
-function validateFileConstraints(
-  userTier: Tier,
-  totalFileSize: number,
-  expiresInMs: number,
-  remainingStorage: number,
-) {
+function validateFileConstraints({
+  userTier,
+  totalFileSize,
+  expiresInMs,
+  usedStorage,
+}: {
+  userTier: Tier;
+  totalFileSize: number;
+  expiresInMs: number;
+  usedStorage: number;
+}) {
   const tierConstraints = TierConstraints[userTier];
 
-  if (totalFileSize > tierConstraints.maxSendSize) {
+  if (
+    tierConstraints.maxSendSize !== -1 &&
+    totalFileSize > tierConstraints.maxSendSize
+  ) {
     throw new BadResponse(
       `File size limit exceeded! Max allowed is ${
         tierConstraints.maxSendSize / (1024 * 1024 * 1024)
@@ -19,7 +27,9 @@ function validateFileConstraints(
     );
   }
 
-  if (remainingStorage < totalFileSize) {
+  const remainingStorage = tierConstraints.maxStorage - usedStorage;
+
+  if (tierConstraints.maxStorage !== -1 && remainingStorage < totalFileSize) {
     throw new BadResponse(
       `Not enough storage! You have ${
         remainingStorage / (1024 * 1024 * 1024)

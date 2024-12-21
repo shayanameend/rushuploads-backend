@@ -16,8 +16,8 @@ const TierConstraints = {
     maxExpiry: 90 * 24 * 60 * 60 * 1000, // 90 days in milliseconds
   },
   PREMIUM: {
-    maxSendSize: Number.POSITIVE_INFINITY,
-    maxStorage: Number.POSITIVE_INFINITY,
+    maxSendSize: -1, // No limit
+    maxStorage: -1, // No limit
     minExpiry: 3 * 24 * 60 * 60 * 1000, // 3 days in milliseconds
     maxExpiry: 365 * 24 * 60 * 60 * 1000, // 365 days in milliseconds
   },
