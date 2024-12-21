@@ -6,6 +6,7 @@ import argon from "argon2";
 import { BadResponse, NotFoundResponse, handleErrors } from "../lib/error";
 import { sendOTP } from "../services/mail";
 import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
+import { createProfile } from "../services/profile";
 import { createUser, getUserByEmail, updateUserById } from "../services/user";
 import { signToken } from "../utils/jwt";
 import {
@@ -18,7 +19,9 @@ import {
 
 async function signUp(request: Request, response: Response) {
   try {
-    const { email, password, role } = signUpSchema.parse(request.body);
+    const { fullName, email, password, role } = signUpSchema.parse(
+      request.body,
+    );
 
     const { user: existingUser } = await getUserByEmail({ email, role });
 
@@ -40,6 +43,10 @@ async function signUp(request: Request, response: Response) {
 
     if (!user) {
       throw new NotFoundResponse("User Not Found!");
+    }
+
+    if (fullName) {
+      await createProfile({ userId: user.id, fullName });
     }
 
     user.isVerified = user.password ? user.isVerified : false;

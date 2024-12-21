@@ -31,14 +31,11 @@ async function getOneProfile(request: Request, response: Response) {
 
 async function createOneProfile(request: Request, response: Response) {
   try {
-    const { firstName, lastName } = createOneProfileBodySchema.parse(
-      request.body,
-    );
+    const { fullName } = createOneProfileBodySchema.parse(request.body);
 
     const { profile } = await createProfile({
       userId: request.user.id,
-      firstName,
-      lastName,
+      fullName,
     });
 
     if (!profile) {
@@ -60,17 +57,14 @@ async function createOneProfile(request: Request, response: Response) {
 
 async function updateOneProfile(request: Request, response: Response) {
   try {
-    const { firstName, lastName } = createOneProfileBodySchema.parse(
-      request.body,
-    );
+    const { fullName } = createOneProfileBodySchema.parse(request.body);
 
     const { profile } = await updateProfile(
       {
         userId: request.user.id,
       },
       {
-        firstName,
-        lastName,
+        fullName,
       },
     );
 

@@ -2,6 +2,17 @@ import { OtpType, Role } from "@prisma/client";
 import * as zod from "zod";
 
 const signUpSchema = zod.object({
+  fullName: zod
+    .string({
+      message: "Invalid Full Name",
+    })
+    .min(3, {
+      message: "Full Name must be at least 3 characters long",
+    })
+    .max(32, {
+      message: "Full Name must be at most 32 characters long",
+    })
+    .optional(),
   email: zod
     .string({
       message: "Invalid Email",

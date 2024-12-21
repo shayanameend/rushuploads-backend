@@ -9,8 +9,7 @@ async function getProfileByUserId(query: { userId: string }) {
     },
     select: {
       id: true,
-      firstName: true,
-      lastName: true,
+      fullName: true,
       updatedAt: true,
       user: {
         select: {
@@ -25,13 +24,11 @@ async function getProfileByUserId(query: { userId: string }) {
 
 async function createProfile(payload: {
   userId: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
 }) {
   const profile = await prisma.profile.create({
     data: {
-      firstName: payload.firstName,
-      lastName: payload.lastName,
+      fullName: payload.fullName,
       user: {
         connect: {
           id: payload.userId,
@@ -40,8 +37,7 @@ async function createProfile(payload: {
     },
     select: {
       id: true,
-      firstName: true,
-      lastName: true,
+      fullName: true,
       updatedAt: true,
       user: {
         select: {
@@ -64,14 +60,10 @@ async function updateProfile(
     where: {
       userId: query.userId,
     },
-    data: {
-      firstName: payload.firstName,
-      lastName: payload.lastName,
-    },
+    data: payload,
     select: {
       id: true,
-      firstName: true,
-      lastName: true,
+      fullName: true,
       updatedAt: true,
       user: {
         select: {

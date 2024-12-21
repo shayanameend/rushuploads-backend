@@ -1,14 +1,29 @@
-import { Tier } from "@prisma/client";
 import * as zod from "zod";
 
 const createOneProfileBodySchema = zod.object({
-  firstName: zod.string(),
-  lastName: zod.string(),
+  fullName: zod
+    .string({
+      message: "Invalid Full Name",
+    })
+    .min(3, {
+      message: "Full Name must be at least 3 characters long",
+    })
+    .max(32, {
+      message: "Full Name must be at most 32 characters long",
+    }),
 });
 
 const updateOneProfileBodySchema = zod.object({
-  firstName: zod.string().optional(),
-  lastName: zod.string().optional(),
+  fullName: zod
+    .string({
+      message: "Invalid Full Name",
+    })
+    .min(3, {
+      message: "Full Name must be at least 3 characters long",
+    })
+    .max(32, {
+      message: "Full Name must be at most 32 characters long",
+    }),
 });
 
 export { createOneProfileBodySchema, updateOneProfileBodySchema };
