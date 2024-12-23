@@ -136,7 +136,7 @@ async function signIn(request: Request, response: Response) {
     }
 
     if (!password) {
-      throw new BadResponse("Invalid Password!");
+      throw new BadResponse("Password Required!");
     }
 
     const isPasswordValid = await argon.verify(user.password, password);
