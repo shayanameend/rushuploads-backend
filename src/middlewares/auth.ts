@@ -27,7 +27,7 @@ function verifyRequest({ role, isVerified }: Readonly<VerifyRequestParams>) {
 
       const token = bearerToken.split(" ")[1];
 
-      if (token) {
+      if (!token) {
         throw new UnauthorizedResponse("Unauthorized!");
       }
 

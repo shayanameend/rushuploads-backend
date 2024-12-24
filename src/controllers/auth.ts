@@ -7,7 +7,12 @@ import { BadResponse, NotFoundResponse, handleErrors } from "../lib/error";
 import { sendOTP } from "../services/mail";
 import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
 import { createProfile } from "../services/profile";
-import { createUser, getUserByEmail, updateUserById } from "../services/user";
+import {
+  createUser,
+  getUserByEmail,
+  updateUserById,
+  upsertUserByEmail,
+} from "../services/user";
 import { signToken } from "../utils/jwt";
 import {
   resetPasswordSchema,
@@ -23,10 +28,12 @@ async function signUp(request: Request, response: Response) {
       request.body,
     );
 
-    const { user: existingUser } = await getUserByEmail({ email, role });
+    if (fullName || password) {
+      const { user: existingUser } = await getUserByEmail({ email, role });
 
-    if (existingUser) {
-      throw new BadResponse("User Already Exists!");
+      if (existingUser) {
+        throw new BadResponse("User Already Exists!");
+      }
     }
 
     let hashedPassword: string | undefined;
@@ -35,11 +42,15 @@ async function signUp(request: Request, response: Response) {
       hashedPassword = await argon.hash(password);
     }
 
-    const { user } = await createUser({
-      email,
-      password: hashedPassword,
-      role,
-    });
+    const { user } = await upsertUserByEmail(
+      {
+        email,
+      },
+      {
+        password: hashedPassword,
+        role,
+      },
+    );
 
     if (!user) {
       throw new NotFoundResponse("User Not Found!");
