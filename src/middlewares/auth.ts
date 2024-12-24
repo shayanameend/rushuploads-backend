@@ -27,6 +27,10 @@ function verifyRequest({ role, isVerified }: Readonly<VerifyRequestParams>) {
 
       const token = bearerToken.split(" ")[1];
 
+      if (token) {
+        throw new UnauthorizedResponse("Unauthorized!");
+      }
+
       const decodedUser = (await verifyToken(token)) as User;
 
       if (role && decodedUser.role !== role) {
