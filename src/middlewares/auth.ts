@@ -1,6 +1,8 @@
 import type { Role, User } from "@prisma/client";
 import type { NextFunction, Request, Response } from "express";
 
+import { TokenExpiredError } from "jsonwebtoken";
+
 import {
   BadResponse,
   ForbiddenResponse,
@@ -51,9 +53,16 @@ function verifyRequest({ role, isVerified }: Readonly<VerifyRequestParams>) {
 
       next();
     } catch (error) {
-      handleErrors({ response, error });
+      if (error instanceof TokenExpiredError) {
+        return response.unauthorized(
+          {},
+          {
+            message: "Token Expired!",
+          },
+        );
+      }
 
-      return;
+      return handleErrors({ response, error });
     }
   };
 }
