@@ -76,4 +76,31 @@ async function updateProfile(
   return { profile };
 }
 
-export { getProfileByUserId, createProfile, updateProfile };
+async function upsertProfile(
+  query: {
+    userId: string;
+  },
+  payload: Prisma.ProfileCreateInput,
+) {
+  const profile = await prisma.profile.upsert({
+    where: {
+      userId: query.userId,
+    },
+    update: payload,
+    create: payload,
+    select: {
+      id: true,
+      fullName: true,
+      updatedAt: true,
+      user: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  });
+
+  return { profile };
+}
+
+export { getProfileByUserId, createProfile, updateProfile, upsertProfile };

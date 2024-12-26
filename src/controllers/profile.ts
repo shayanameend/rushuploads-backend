@@ -1,11 +1,7 @@
 import type { Request, Response } from "express";
 
 import { BadResponse, NotFoundResponse, handleErrors } from "../lib/error";
-import {
-  createProfile,
-  getProfileByUserId,
-  updateProfile,
-} from "../services/profile";
+import { getProfileByUserId, upsertProfile } from "../services/profile";
 import { createOneProfileBodySchema } from "../validators/profile";
 
 async function getOneProfile(request: Request, response: Response) {
@@ -33,10 +29,19 @@ async function createOneProfile(request: Request, response: Response) {
   try {
     const { fullName } = createOneProfileBodySchema.parse(request.body);
 
-    const { profile } = await createProfile({
-      userId: request.user.id,
-      fullName,
-    });
+    const { profile } = await upsertProfile(
+      {
+        userId: request.user.id,
+      },
+      {
+        fullName,
+        user: {
+          connect: {
+            id: request.user.id,
+          },
+        },
+      },
+    );
 
     if (!profile) {
       throw new BadResponse("Profile Creation Failed!");
@@ -59,12 +64,17 @@ async function updateOneProfile(request: Request, response: Response) {
   try {
     const { fullName } = createOneProfileBodySchema.parse(request.body);
 
-    const { profile } = await updateProfile(
+    const { profile } = await upsertProfile(
       {
         userId: request.user.id,
       },
       {
         fullName,
+        user: {
+          connect: {
+            id: request.user.id,
+          },
+        },
       },
     );
 

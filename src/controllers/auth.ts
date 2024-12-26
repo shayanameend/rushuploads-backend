@@ -25,11 +25,11 @@ async function signUp(request: Request, response: Response) {
   try {
     request.body.email = request.body.email.toLowerCase();
 
-    const { fullName, email, password, role } = signUpSchema.parse(
+    const { fullName, email, password, role, isSocial } = signUpSchema.parse(
       request.body,
     );
 
-    if (fullName || password) {
+    if (password) {
       const { user: existingUser } = await getUserByEmail({ email, role });
 
       if (existingUser) {
@@ -50,6 +50,7 @@ async function signUp(request: Request, response: Response) {
       {
         password: hashedPassword,
         role,
+        isVerified: isSocial,
       },
     );
 
@@ -61,7 +62,9 @@ async function signUp(request: Request, response: Response) {
       await createProfile({ userId: user.id, fullName });
     }
 
-    user.isVerified = user.password ? user.isVerified : false;
+    if (!isSocial) {
+      user.isVerified = user.password ? user.isVerified : false;
+    }
 
     const token = await signToken({
       id: user.id,
@@ -74,19 +77,23 @@ async function signUp(request: Request, response: Response) {
       updatedAt: user.updatedAt,
     });
 
-    const { otp } = await upsertOTP(
-      { userId: user.id },
-      { otpType: OtpType.VERIFY_EMAIL },
-    );
+    if (!isSocial) {
+      const { otp } = await upsertOTP(
+        { userId: user.id },
+        { otpType: OtpType.VERIFY_EMAIL },
+      );
 
-    await sendOTP({
-      to: user.email,
-      code: otp.code,
-    });
+      await sendOTP({
+        to: user.email,
+        code: otp.code,
+      });
+    }
+
+    user.password = undefined;
 
     return response.created(
       {
-        data: { token },
+        data: isSocial ? { user, token } : { token },
       },
       {
         message: "Sign Up Successfull!",
