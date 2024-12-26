@@ -8,7 +8,6 @@ import { sendOTP } from "../services/mail";
 import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
 import { createProfile } from "../services/profile";
 import {
-  createUser,
   getUserByEmail,
   updateUserById,
   upsertUserByEmail,
@@ -24,6 +23,8 @@ import {
 
 async function signUp(request: Request, response: Response) {
   try {
+    request.body.email = request.body.email.toLowerCase();
+
     const { fullName, email, password, role } = signUpSchema.parse(
       request.body,
     );
@@ -98,6 +99,8 @@ async function signUp(request: Request, response: Response) {
 
 async function signIn(request: Request, response: Response) {
   try {
+    request.body.email = request.body.email.toLowerCase();
+
     const { email, password, role } = signInSchema.parse(request.body);
 
     const { user } = await getUserByEmail({ email, role });
@@ -194,6 +197,8 @@ async function signIn(request: Request, response: Response) {
 
 async function resetPassword(request: Request, response: Response) {
   try {
+    request.body.email = request.body.email.toLowerCase();
+
     const { email, role } = resetPasswordSchema.parse(request.body);
 
     const { user } = await getUserByEmail({ email, role });

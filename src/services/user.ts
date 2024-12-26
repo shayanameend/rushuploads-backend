@@ -23,7 +23,9 @@ async function getUserById(query: { id: string; role?: Role }) {
     },
   });
 
-  return { user };
+  return {
+    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+  };
 }
 
 async function getUserByEmail(query: { email: string; role?: Role }) {
@@ -46,7 +48,9 @@ async function getUserByEmail(query: { email: string; role?: Role }) {
     },
   });
 
-  return { user };
+  return {
+    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+  };
 }
 
 async function getUsers(
@@ -115,7 +119,9 @@ async function createUser(payload: {
     },
   });
 
-  return { user };
+  return {
+    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+  };
 }
 
 async function updateUserById(
@@ -142,7 +148,9 @@ async function updateUserById(
     },
   });
 
-  return { user };
+  return {
+    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+  };
 }
 
 async function updateUserByEmail(
@@ -169,7 +177,9 @@ async function updateUserByEmail(
     },
   });
 
-  return { user };
+  return {
+    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+  };
 }
 
 async function upsertUserByEmail(
@@ -201,7 +211,9 @@ async function upsertUserByEmail(
     },
   });
 
-  return { user };
+  return {
+    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+  };
 }
 
 async function deleteUserById(query: { id: string; role?: Role }) {
@@ -209,7 +221,9 @@ async function deleteUserById(query: { id: string; role?: Role }) {
     isDeleted: true,
   });
 
-  return { user };
+  return {
+    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+  };
 }
 
 async function deleteUserByEmail(query: { email: string; role?: Role }) {
@@ -217,7 +231,9 @@ async function deleteUserByEmail(query: { email: string; role?: Role }) {
     isDeleted: true,
   });
 
-  return { user };
+  return {
+    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+  };
 }
 
 export {

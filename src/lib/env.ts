@@ -5,6 +5,9 @@ import * as zod from "zod";
 const envSchema = zod.object({
   NODE_ENV: zod.enum(["development", "production"]),
   PORT: zod.coerce.number().min(1000).max(9999),
+  SSL_KEY_PATH: zod.string().optional(),
+  SSL_CERT_PATH: zod.string().optional(),
+  SSL_CA_PATH: zod.string().optional(),
   JWT_SECRET: zod.string(),
   JWT_EXPIRY: zod.string(),
   NODEMAILER_SERVICE: zod.string(),

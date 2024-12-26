@@ -1,5 +1,6 @@
 import type { Server } from "node:http";
 
+import { readFileSync } from "node:fs";
 import { createServer as createHttpServer } from "node:http";
 import { createServer as createHttpsServer } from "node:https";
 
@@ -17,7 +18,20 @@ let server: Server;
 
 switch (env.NODE_ENV) {
   case "production":
-    server = createHttpsServer(app);
+    if (!env.SSL_KEY_PATH || !env.SSL_CERT_PATH || !env.SSL_CA_PATH) {
+      throw new Error(
+        "SSL_KEY_PATH, SSL_CERT_PATH, and SSL_CA_PATH are required in production",
+      );
+    }
+
+    server = createHttpsServer(
+      {
+        key: readFileSync(env.SSL_KEY_PATH),
+        cert: readFileSync(env.SSL_CERT_PATH),
+        ca: readFileSync(env.SSL_CA_PATH),
+      },
+      app,
+    );
     break;
   case "development":
     server = createHttpServer(app);
