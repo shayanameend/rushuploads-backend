@@ -26,11 +26,7 @@ fileRouter.get(
   getUserReceivedFiles,
 );
 
-fileRouter.get(
-  "/link/:linkId",
-  verifyRequest({ isVerified: true, role: Role.USER }),
-  getLink,
-);
+fileRouter.get("/link/:linkId", getLink);
 
 fileRouter.post(
   "/link",
