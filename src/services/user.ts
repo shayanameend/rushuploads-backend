@@ -24,10 +24,12 @@ async function getUserById(query: { id: string; role?: Role }) {
   });
 
   return {
-    user: user ?? {
-      ...user,
-      transferLimit: TierConstraints[user.tier].maxSendSize,
-    },
+    user: user
+      ? {
+          ...user,
+          transferLimit: TierConstraints[user.tier].maxSendSize,
+        }
+      : user,
   };
 }
 
@@ -52,10 +54,12 @@ async function getUserByEmail(query: { email: string; role?: Role }) {
   });
 
   return {
-    user: user ?? {
-      ...user,
-      transferLimit: TierConstraints[user.tier].maxSendSize,
-    },
+    user: user
+      ? {
+          ...user,
+          transferLimit: TierConstraints[user.tier].maxSendSize,
+        }
+      : user,
   };
 }
 
@@ -126,10 +130,12 @@ async function createUser(payload: {
   });
 
   return {
-    user: user ?? {
-      ...user,
-      transferLimit: TierConstraints[user.tier].maxSendSize,
-    },
+    user: user
+      ? {
+          ...user,
+          transferLimit: TierConstraints[user.tier].maxSendSize,
+        }
+      : user,
   };
 }
 
@@ -158,10 +164,12 @@ async function updateUserById(
   });
 
   return {
-    user: user ?? {
-      ...user,
-      transferLimit: TierConstraints[user.tier].maxSendSize,
-    },
+    user: user
+      ? {
+          ...user,
+          transferLimit: TierConstraints[user.tier].maxSendSize,
+        }
+      : user,
   };
 }
 
@@ -190,10 +198,12 @@ async function updateUserByEmail(
   });
 
   return {
-    user: user ?? {
-      ...user,
-      transferLimit: TierConstraints[user.tier].maxSendSize,
-    },
+    user: user
+      ? {
+          ...user,
+          transferLimit: TierConstraints[user.tier].maxSendSize,
+        }
+      : user,
   };
 }
 
@@ -227,10 +237,12 @@ async function upsertUserByEmail(
   });
 
   return {
-    user: user ?? {
-      ...user,
-      transferLimit: TierConstraints[user.tier].maxSendSize,
-    },
+    user: user
+      ? {
+          ...user,
+          transferLimit: TierConstraints[user.tier].maxSendSize,
+        }
+      : user,
   };
 }
 
@@ -240,10 +252,12 @@ async function deleteUserById(query: { id: string; role?: Role }) {
   });
 
   return {
-    user: user ?? {
-      ...user,
-      transferLimit: TierConstraints[user.tier].maxSendSize,
-    },
+    user: user
+      ? {
+          ...user,
+          transferLimit: TierConstraints[user.tier].maxSendSize,
+        }
+      : user,
   };
 }
 
@@ -253,10 +267,12 @@ async function deleteUserByEmail(query: { email: string; role?: Role }) {
   });
 
   return {
-    user: user ?? {
-      ...user,
-      transferLimit: TierConstraints[user.tier].maxSendSize,
-    },
+    user: user
+      ? {
+          ...user,
+          transferLimit: TierConstraints[user.tier].maxSendSize,
+        }
+      : user,
   };
 }
 
