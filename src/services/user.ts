@@ -24,7 +24,10 @@ async function getUserById(query: { id: string; role?: Role }) {
   });
 
   return {
-    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+    user: user ?? {
+      ...user,
+      transferLimit: TierConstraints[user.tier].maxSendSize,
+    },
   };
 }
 
@@ -49,7 +52,10 @@ async function getUserByEmail(query: { email: string; role?: Role }) {
   });
 
   return {
-    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+    user: user ?? {
+      ...user,
+      transferLimit: TierConstraints[user.tier].maxSendSize,
+    },
   };
 }
 
@@ -120,7 +126,10 @@ async function createUser(payload: {
   });
 
   return {
-    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+    user: user ?? {
+      ...user,
+      transferLimit: TierConstraints[user.tier].maxSendSize,
+    },
   };
 }
 
@@ -149,7 +158,10 @@ async function updateUserById(
   });
 
   return {
-    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+    user: user ?? {
+      ...user,
+      transferLimit: TierConstraints[user.tier].maxSendSize,
+    },
   };
 }
 
@@ -178,7 +190,10 @@ async function updateUserByEmail(
   });
 
   return {
-    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+    user: user ?? {
+      ...user,
+      transferLimit: TierConstraints[user.tier].maxSendSize,
+    },
   };
 }
 
@@ -212,7 +227,10 @@ async function upsertUserByEmail(
   });
 
   return {
-    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+    user: user ?? {
+      ...user,
+      transferLimit: TierConstraints[user.tier].maxSendSize,
+    },
   };
 }
 
@@ -222,7 +240,10 @@ async function deleteUserById(query: { id: string; role?: Role }) {
   });
 
   return {
-    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+    user: user ?? {
+      ...user,
+      transferLimit: TierConstraints[user.tier].maxSendSize,
+    },
   };
 }
 
@@ -232,7 +253,10 @@ async function deleteUserByEmail(query: { email: string; role?: Role }) {
   });
 
   return {
-    user: { ...user, transferLimit: TierConstraints[user.tier].maxSendSize },
+    user: user ?? {
+      ...user,
+      transferLimit: TierConstraints[user.tier].maxSendSize,
+    },
   };
 }
 
