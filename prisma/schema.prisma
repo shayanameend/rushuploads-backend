@@ -36,10 +36,9 @@ model User {
   otpId String? @map("otp_id") @db.ObjectId
   otp   Otp?
 
-  files   File[]
-  links   Link[]
-  mails   Mail[]
-  rewards Reward[]
+  files File[]
+  links Link[]
+  mails Mail[]
 
   sharedFileIds String[] @map("shared_file_ids") @db.ObjectId
   sharedFiles   File[]   @relation("Shared", fields: [sharedFileIds], references: [id])
@@ -116,7 +115,8 @@ model Link {
   userId String @map("user_id") @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])
 
-  files File[]
+  files   File[]
+  rewards Reward[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -182,8 +182,8 @@ model Reward {
   value  RewardValue  @default(FIVE)
   status RewardStatus @default(PENDING)
 
-  userId String @unique @map("user_id") @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
+  linkId String @unique @map("link_id") @db.ObjectId
+  link   Link   @relation(fields: [linkId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")

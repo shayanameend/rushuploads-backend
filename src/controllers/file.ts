@@ -19,6 +19,7 @@ import {
   getLinkParamsSchema,
   sendFileMailBodySchema,
 } from "../validators/file";
+import { createReward } from "../services/reward";
 
 async function getUserSharedFiles(request: Request, response: Response) {
   try {
@@ -29,7 +30,7 @@ async function getUserSharedFiles(request: Request, response: Response) {
       url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
     }));
 
-    response.success(
+    return response.success(
       {
         data: { files: augmentedFiles },
       },
@@ -51,7 +52,7 @@ async function getUserReceivedFiles(request: Request, response: Response) {
       url: `https://${env.AWS_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${file.name}`,
     }));
 
-    response.success(
+    return response.success(
       {
         data: { files: augmentedFiles },
       },
@@ -79,7 +80,9 @@ async function getLink(request: Request, response: Response) {
 
     link.files = augmentedFiles;
 
-    response.success(
+    await createReward({ linkId: link.id });
+
+    return response.success(
       {
         data: { link },
       },
@@ -148,7 +151,7 @@ async function generateFileLink(request: Request, response: Response) {
 
     link.files = augmentedFiles;
 
-    response.created(
+    return response.created(
       {
         data: { link },
       },
@@ -233,7 +236,7 @@ async function sendFileMail(request: Request, response: Response) {
 
     mail.files = augmentedFiles;
 
-    response.created(
+    return response.created(
       {
         data: { mail },
       },
@@ -257,7 +260,10 @@ async function deleteFile(request: Request, response: Response) {
       throw new BadResponse("File Not Found!");
     }
 
-    response.success({ file }, { message: "File Deleted Successfully!" });
+    return response.success(
+      { file },
+      { message: "File Deleted Successfully!" },
+    );
   } catch (error) {
     return handleErrors({ response, error });
   }
