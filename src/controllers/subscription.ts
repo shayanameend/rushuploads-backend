@@ -31,7 +31,6 @@ async function createCheckout(request: Request, response: Response) {
     return response.created(
       {
         data: {
-          sessionId: session.id,
           url: session.url,
         },
       },
@@ -61,7 +60,6 @@ async function createPortal(request: Request, response: Response) {
     return response.created(
       {
         data: {
-          sessionId: session.id,
           url: session.url,
         },
       },
