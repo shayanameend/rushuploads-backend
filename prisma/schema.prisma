@@ -162,16 +162,10 @@ model Subscription {
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 }
 
-enum RewardStatus {
-  PENDING
-  REDEEMED
-}
-
 model Reward {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  ip     String       @map("ip")
-  status RewardStatus @default(PENDING)
+  ip String @map("ip")
 
   linkId String @unique @map("link_id") @db.ObjectId
   link   Link   @relation(fields: [linkId], references: [id])

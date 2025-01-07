@@ -7,7 +7,7 @@ const redeemRewardParamsSchema = zod.object({
 });
 
 const redeemRewardBodySchema = zod.object({
-  amountInCents: zod
+  amountInCents: zod.coerce
     .number({
       message: "Amount must be a number",
     })

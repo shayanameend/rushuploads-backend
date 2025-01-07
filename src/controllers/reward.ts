@@ -9,6 +9,70 @@ import {
   redeemRewardParamsSchema,
 } from "../validators/reward";
 
+export async function getRewards(request: Request, response: Response) {
+  try {
+    const rewards = await prisma.reward.findMany({
+      where: {
+        link: {
+          userId: request.user.id,
+        },
+      },
+      select: {
+        id: true,
+        link: {
+          select: {
+            id: true,
+            title: true,
+            message: true,
+            updatedAt: true,
+            files: {
+              select: {
+                id: true,
+                originalName: true,
+                name: true,
+                type: true,
+                isExpired: true,
+                expiredAt: true,
+                updatedAt: true,
+              },
+            },
+            user: {
+              select: {
+                email: true,
+              },
+            },
+          },
+        },
+        updatedAt: true,
+      },
+    });
+
+    const groupedRewards = rewards.reduce((acc, reward) => {
+      if (!acc[reward.link.id]) {
+        acc[reward.link.id] = {
+          ...reward.link,
+          rewards: [],
+        };
+      }
+
+      acc[reward.link.id].rewards.push(reward);
+
+      return acc;
+    }, {});
+
+    return response.success(
+      {
+        data: { rewards, groupedRewards },
+      },
+      {
+        message: "Rewards Found!",
+      },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
 export async function createOnboard(request: Request, response: Response) {
   try {
     const { id } = await stripe.accounts.create({
