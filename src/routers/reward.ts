@@ -1,10 +1,19 @@
 import { Role } from "@prisma/client";
 import { Router } from "express";
 
-import { createOnboard, redeemReward } from "../controllers/reward";
+import { createOnboard, getRewards, redeemReward } from "../controllers/reward";
 import { verifyRequest } from "../middlewares/auth";
 
 const rewardRouter = Router();
+
+rewardRouter.get(
+  "/",
+  verifyRequest({
+    isVerified: true,
+    role: Role.USER,
+  }),
+  getRewards,
+);
 
 rewardRouter.post(
   "/onboard",
