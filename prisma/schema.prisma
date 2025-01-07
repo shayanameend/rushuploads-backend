@@ -43,6 +43,8 @@ model User {
   sharedFileIds String[] @map("shared_file_ids") @db.ObjectId
   sharedFiles   File[]   @relation("Shared", fields: [sharedFileIds], references: [id])
 
+  accountId String? @map("account_id")
+
   subscriptionId String?       @map("subscription_id") @db.ObjectId
   subscription   Subscription?
 
@@ -165,17 +167,10 @@ enum RewardStatus {
   REDEEMED
 }
 
-enum RewardValue {
-  ONE
-  FIVE
-  TEN
-}
-
 model Reward {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   ip     String       @map("ip")
-  value  RewardValue  @default(ONE)
   status RewardStatus @default(PENDING)
 
   linkId String @unique @map("link_id") @db.ObjectId
