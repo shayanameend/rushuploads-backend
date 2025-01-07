@@ -11,6 +11,7 @@ import {
 } from "../services/file";
 import { createLink, getLinkById } from "../services/link";
 import { createMail, sendFiles } from "../services/mail";
+import { createReward, getRewardByIpAndLinkId } from "../services/reward";
 import { updateUserById, upsertUserByEmail } from "../services/user";
 import { validateFileConstraints } from "../utils/file";
 import {
@@ -19,7 +20,6 @@ import {
   getLinkParamsSchema,
   sendFileMailBodySchema,
 } from "../validators/file";
-import { createReward } from "../services/reward";
 
 async function getUserSharedFiles(request: Request, response: Response) {
   try {
@@ -80,7 +80,13 @@ async function getLink(request: Request, response: Response) {
 
     link.files = augmentedFiles;
 
-    await createReward({ linkId: link.id });
+    const ip = request.socket.remoteAddress;
+
+    const { reward } = await getRewardByIpAndLinkId({ ip, linkId });
+
+    if (!reward) {
+      await createReward({ ip, linkId: link.id });
+    }
 
     return response.success(
       {
