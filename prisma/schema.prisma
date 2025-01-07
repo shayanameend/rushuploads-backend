@@ -160,26 +160,22 @@ model Subscription {
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 }
 
-enum RewardType {
-  DOWNLOAD
-}
-
 enum RewardStatus {
   PENDING
   REDEEMED
 }
 
 enum RewardValue {
+  ONE
   FIVE
   TEN
-  FIFTEEN
 }
 
 model Reward {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  type   RewardType   @default(DOWNLOAD)
-  value  RewardValue  @default(FIVE)
+  ip     String       @map("ip")
+  value  RewardValue  @default(ONE)
   status RewardStatus @default(PENDING)
 
   linkId String @unique @map("link_id") @db.ObjectId
@@ -187,4 +183,6 @@ model Reward {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@unique([ip, linkId])
 }
