@@ -141,7 +141,7 @@ async function sendFiles({
         }
       .cta-button {
     display: inline-block;
-    margin: 20px auto;
+    margin: 20px auto 5px;
     padding: 12px 24px;
     background-color: #4a4a4a; /* Neutral gray background */
     color: #ffffff; /* White text */
@@ -165,7 +165,7 @@ async function sendFiles({
 }
         .footer {
             text-align: center;
-            margin-top: 10px;
+            margin-top: 5px;
             padding: 10px;
             font-size: 12px;
             color: #aaaaaa;
@@ -179,8 +179,8 @@ async function sendFiles({
         </div>
         <div class="content">
             <p>Hello,</p>
-            <p>You have received some files from <strong>${senderEmail}</strong>. Click the button below to download them:</p>
-            <a href="${link}" class="cta-button">Access Files</a>
+            <p>You have received some files from <strong style="color: white;">${senderEmail}</strong>. Click the button below to download them:</p>
+            <a href="${link}" style="color: white;" class="cta-button">Get Files</a>
             ${
               message &&
               `
