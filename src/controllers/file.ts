@@ -234,10 +234,11 @@ async function sendFileMail(request: Request, response: Response) {
     }));
 
     sendFiles({
-      to: mail.to.join(", "),
-      title: mail.title,
+      senderEmail: request.user.email,
+      recipientEmail: mail.to.join(", "),
+      title: mail.title || "File Shared",
       message: mail.message,
-      files: augmentedFiles,
+      link: `${env.CLIENT_BASE_URL}/preview/${mail.id}`,
     });
 
     mail.files = augmentedFiles;

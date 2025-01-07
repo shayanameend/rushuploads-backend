@@ -8,7 +8,7 @@ async function createMail(payload: {
   fileIds: string[];
   userId: string;
 }) {
-  const mail = await prisma.mail.create({
+  const mail = await prisma.link.create({
     data: {
       to: payload.to,
       title: payload.title,
@@ -76,19 +76,17 @@ async function sendOTP({
 }
 
 async function sendFiles({
-  to,
+  senderEmail,
+  recipientEmail,
   title,
   message,
-  files,
+  link,
 }: {
-  to: string;
+  senderEmail: string;
+  recipientEmail: string;
   title: string;
   message: string;
-  files: {
-    originalName: string;
-    url: string;
-    type: string;
-  }[];
+  link: string;
 }) {
   nodemailerTransporter.sendMail(
     {
@@ -96,14 +94,108 @@ async function sendFiles({
         name: "Rush Uploads",
         address: "support@rushuploads.com",
       },
-      to,
+      to: recipientEmail,
       subject: title,
-      text: message,
-      attachments: files.map((file) => ({
-        filename: file.originalName,
-        path: file.url,
-        contentType: file.type,
-      })),
+      html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Files Are Ready</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1c1c1e; /* Dark background */
+            color: #ffffff; /* Light text */
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #2a2a2d; /* Slightly lighter background for the card */
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Soft shadow */
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            background: linear-gradient(45deg, #ff416c, #ff4b2b); /* Gradient header */
+            color: white;
+            border-radius: 16px 16px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 20px;
+            text-align: center;
+        }
+        .content p {
+            margin: 10px 0;
+            color: #bbbbbb; /* Softer text */
+        }
+      .cta-button {
+    display: inline-block;
+    margin: 20px auto;
+    padding: 12px 24px;
+    background-color: #4a4a4a; /* Neutral gray background */
+    color: #ffffff; /* White text */
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: background-color 0.3s ease-in-out;
+    text-align: center;
+}
+.cta-button:hover {
+    background-color: #6a6a6a; /* Slightly lighter gray on hover */
+    text-decoration: none;
+}
+.cta-button:visited {
+    color: #ffffff; /* Ensure visited color stays consistent */
+    text-decoration: none;
+}
+.cta-button:active {
+    background-color: #3a3a3a; /* Darker gray on active */
+    text-decoration: none;
+}
+        .footer {
+            text-align: center;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 12px;
+            color: #aaaaaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Your Files Are Ready!</h1>
+        </div>
+        <div class="content">
+            <p>Hello,</p>
+            <p>You have received some files from <strong>${senderEmail}</strong>. Click the button below to download them:</p>
+            <a href="${link}" class="cta-button">Access Files</a>
+            ${
+              message &&
+              `
+            <p><strong>Message from sender:</strong></p>
+            <p>${message}</p>
+            `
+            }
+        </div>
+        <div class="footer">
+            <p>Delivered via <strong>Rush Uploads</strong></p>
+        </div>
+    </div>
+</body>
+</html>
+      `,
     },
     (err) => {
       if (err) {

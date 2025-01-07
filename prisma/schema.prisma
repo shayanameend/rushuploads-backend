@@ -38,7 +38,6 @@ model User {
 
   files File[]
   links Link[]
-  mails Mail[]
 
   sharedFileIds String[] @map("shared_file_ids") @db.ObjectId
   sharedFiles   File[]   @relation("Shared", fields: [sharedFileIds], references: [id])
@@ -97,9 +96,6 @@ model File {
   linkId String? @map("link_ids") @db.ObjectId
   link   Link?   @relation(fields: [linkId], references: [id])
 
-  mailId String? @map("mail_ids") @db.ObjectId
-  mail   Mail?   @relation(fields: [mailId], references: [id])
-
   sharedToUserIds String[] @map("shared_to_user_ids") @db.ObjectId
   sharedToUsers   User[]   @relation("Shared", fields: [sharedToUserIds], references: [id])
 
@@ -111,6 +107,7 @@ model File {
 model Link {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
+  to      String[] @default([]) @map("receiver_emails")
   title   String?
   message String?
 
@@ -119,22 +116,6 @@ model Link {
 
   files   File[]
   rewards Reward[]
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
-}
-
-model Mail {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  to      String[] @map("receiver_emails")
-  title   String?
-  message String?
-
-  userId String @map("user_id") @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
-
-  files File[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
