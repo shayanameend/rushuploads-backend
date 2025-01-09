@@ -36,7 +36,6 @@ const signUpSchema = zod.object({
       message: "Role must be either 'USER' or 'ADMIN'",
     })
     .default(Role.USER),
-  isSocial: zod.boolean().default(false),
 });
 
 const signInSchema = zod.object({
