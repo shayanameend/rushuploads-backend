@@ -1,3 +1,4 @@
+import { env } from "../lib/env";
 import { nodemailerTransporter } from "../lib/nodemailer";
 import { prisma } from "../lib/prisma";
 
@@ -91,8 +92,8 @@ async function sendFiles({
   nodemailerTransporter.sendMail(
     {
       from: {
-        name: "Rush Uploads",
-        address: "support@rushuploads.com",
+        name: env.APP_NAME,
+        address: env.APP_SUPPORT_EMAIL,
       },
       to: recipientEmail,
       subject: title,
