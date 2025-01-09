@@ -11,6 +11,7 @@ import { fileRouter } from "./routers/file";
 import { profileRouter } from "./routers/profile";
 import { rewardRouter } from "./routers/reward";
 import { subscriptionRouter } from "./routers/subscription";
+import { supportRouter } from "./routers/support";
 import { userRouter } from "./routers/user";
 
 const app = express();
@@ -29,6 +30,7 @@ app.use("/profiles", profileRouter);
 app.use("/files", fileRouter);
 app.use("/subscriptions", subscriptionRouter);
 app.use("/rewards", rewardRouter);
+app.use("/support", supportRouter);
 
 app.get("/test", verifyRequest({ isVerified: true }), (_request, response) => {
   response.success({}, { message: "Test route!" });
