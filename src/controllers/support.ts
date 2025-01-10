@@ -12,8 +12,8 @@ export async function sendSupportEmail(request: Request, response: Response) {
     const rawFiles = (request.files as Express.Multer.File[]) ?? [];
 
     nodemailerTransporter.sendMail({
-      from: request.user.email,
-      to: env.APP_SUPPORT_EMAIL,
+      from: env.APP_SUPPORT_EMAIL,
+      to: env.APP_ADMIN_EMAIL,
       subject,
       text: message,
       attachments: rawFiles.map((file) => ({
