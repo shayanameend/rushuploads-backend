@@ -7,7 +7,9 @@ import { sendSupportEmailBodySchema } from "../validators/support";
 
 export async function sendSupportEmail(request: Request, response: Response) {
   try {
-    const { subject, message } = sendSupportEmailBodySchema.parse(request.body);
+    const { email, subject, message } = sendSupportEmailBodySchema.parse(
+      request.body,
+    );
 
     const rawFiles = (request.files as Express.Multer.File[]) ?? [];
 
@@ -15,7 +17,7 @@ export async function sendSupportEmail(request: Request, response: Response) {
       from: env.APP_SUPPORT_EMAIL,
       to: env.APP_ADMIN_EMAIL,
       subject,
-      text: message,
+      text: `${message} by ${email}`,
       attachments: rawFiles.map((file) => ({
         filename: file.originalname,
         content: file.buffer,

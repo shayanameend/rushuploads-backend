@@ -7,11 +7,6 @@ import { upload } from "../middlewares/upload";
 
 const supportRouter = Router();
 
-supportRouter.post(
-  "/",
-  verifyRequest({ isVerified: true, role: Role.USER }),
-  upload,
-  sendSupportEmail,
-);
+supportRouter.post("/", upload, sendSupportEmail);
 
 export { supportRouter };

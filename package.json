@@ -15,6 +15,7 @@
   "packageManager": "pnpm@9.15.0",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.712.0",
+    "@aws-sdk/client-ses": "^3.726.0",
     "@prisma/client": "^6.2.1",
     "argon2": "^0.41.1",
     "cors": "^2.8.5",
