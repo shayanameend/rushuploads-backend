@@ -12,7 +12,7 @@
     "start": "tsx src/server.ts",
     "watch": "tsx --watch src/server.ts"
   },
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "pnpm@9.15.3",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.712.0",
     "@aws-sdk/client-ses": "^3.726.0",

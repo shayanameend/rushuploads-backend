@@ -1,9 +1,11 @@
 import type { Request, Response } from "express";
 
+import { SendEmailCommand } from "@aws-sdk/client-ses";
+
 import { env } from "../lib/env";
 import { handleErrors } from "../lib/error";
-import { nodemailerTransporter } from "../lib/nodemailer";
 import { sendSupportEmailBodySchema } from "../validators/support";
+import { sesClient } from "../lib/ses";
 
 export async function sendSupportEmail(request: Request, response: Response) {
   try {
@@ -11,18 +13,24 @@ export async function sendSupportEmail(request: Request, response: Response) {
       request.body,
     );
 
-    const rawFiles = (request.files as Express.Multer.File[]) ?? [];
-
-    nodemailerTransporter.sendMail({
-      from: env.APP_SUPPORT_EMAIL,
-      to: env.APP_ADMIN_EMAIL,
-      subject,
-      text: `${message} by ${email}`,
-      attachments: rawFiles.map((file) => ({
-        filename: file.originalname,
-        content: file.buffer,
-      })),
+    const command = new SendEmailCommand({
+      Source: env.APP_SUPPORT_EMAIL,
+      Destination: {
+        ToAddresses: [env.APP_ADMIN_EMAIL],
+      },
+      Message: {
+        Subject: {
+          Data: subject,
+        },
+        Body: {
+          Text: {
+            Data: `${message} by ${email}`,
+          },
+        },
+      },
     });
+
+    sesClient.send(command);
 
     return response.success({}, { message: "Email Sent Successfully!" });
   } catch (error) {

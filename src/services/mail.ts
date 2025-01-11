@@ -1,6 +1,8 @@
+import { SendEmailCommand } from "@aws-sdk/client-ses";
+
 import { env } from "../lib/env";
-import { nodemailerTransporter } from "../lib/nodemailer";
 import { prisma } from "../lib/prisma";
+import { sesClient } from "../lib/ses";
 
 async function createMail(payload: {
   to: string[];
@@ -58,22 +60,24 @@ async function sendOTP({
   to: string;
   code: string;
 }) {
-  nodemailerTransporter.sendMail(
-    {
-      from: {
-        name: "Rush Uploads",
-        address: "support@rushuploads.com",
+  const command = new SendEmailCommand({
+    Source: env.APP_SUPPORT_EMAIL,
+    Destination: {
+      ToAddresses: [to],
+    },
+    Message: {
+      Subject: {
+        Data: "Verify Your Email",
       },
-      to,
-      subject: "Verify Your Email",
-      text: `Your OTP Code is: ${code}`,
+      Body: {
+        Text: {
+          Data: `Your OTP Code is: ${code}`,
+        },
+      },
     },
-    (err) => {
-      if (err) {
-        console.error(err);
-      }
-    },
-  );
+  });
+
+  sesClient.send(command);
 }
 
 async function sendFiles({
@@ -89,15 +93,18 @@ async function sendFiles({
   message: string;
   link: string;
 }) {
-  nodemailerTransporter.sendMail(
-    {
-      from: {
-        name: env.APP_NAME,
-        address: env.APP_SUPPORT_EMAIL,
+  const command = new SendEmailCommand({
+    Source: env.APP_SUPPORT_EMAIL,
+    Destination: {
+      ToAddresses: [recipientEmail],
+    },
+    Message: {
+      Subject: {
+        Data: title,
       },
-      to: recipientEmail,
-      subject: title,
-      html: `
+      Body: {
+        Html: {
+          Data: `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -196,14 +203,13 @@ async function sendFiles({
     </div>
 </body>
 </html>
-      `,
+          `,
+        },
+      },
     },
-    (err) => {
-      if (err) {
-        console.error(err);
-      }
-    },
-  );
+  });
+
+  sesClient.send(command);
 }
 
 export { createMail, sendOTP, sendFiles };
