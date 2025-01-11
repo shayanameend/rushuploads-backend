@@ -4,8 +4,8 @@ import { SendEmailCommand } from "@aws-sdk/client-ses";
 
 import { env } from "../lib/env";
 import { handleErrors } from "../lib/error";
-import { sendSupportEmailBodySchema } from "../validators/support";
 import { sesClient } from "../lib/ses";
+import { sendSupportEmailBodySchema } from "../validators/support";
 
 export async function sendSupportEmail(request: Request, response: Response) {
   try {
