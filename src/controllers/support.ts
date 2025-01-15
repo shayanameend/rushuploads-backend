@@ -1,36 +1,26 @@
 import type { Request, Response } from "express";
 
-import { SendEmailCommand } from "@aws-sdk/client-ses";
-
 import { env } from "../lib/env";
 import { handleErrors } from "../lib/error";
-import { sesClient } from "../lib/ses";
+import { nodemailerTransporter } from "../lib/nodemailer";
 import { sendSupportEmailBodySchema } from "../validators/support";
 
 export async function sendSupportEmail(request: Request, response: Response) {
   try {
-    const { email, subject, message } = sendSupportEmailBodySchema.parse(
-      request.body,
-    );
+    const { subject, message } = sendSupportEmailBodySchema.parse(request.body);
 
-    const command = new SendEmailCommand({
-      Source: env.APP_SUPPORT_EMAIL,
-      Destination: {
-        ToAddresses: [env.APP_ADMIN_EMAIL],
-      },
-      Message: {
-        Subject: {
-          Data: subject,
-        },
-        Body: {
-          Text: {
-            Data: `${message} by ${email}`,
-          },
-        },
-      },
+    const rawFiles = (request.files as Express.Multer.File[]) ?? [];
+
+    nodemailerTransporter.sendMail({
+      from: env.APP_SUPPORT_EMAIL,
+      to: env.APP_ADMIN_EMAIL,
+      subject,
+      text: message,
+      attachments: rawFiles.map((file) => ({
+        filename: file.originalname,
+        content: file.buffer,
+      })),
     });
-
-    sesClient.send(command);
 
     return response.success({}, { message: "Email Sent Successfully!" });
   } catch (error) {
