@@ -10,7 +10,6 @@ const envSchema = zod.object({
   SSL_CA_PATH: zod.string().optional(),
   JWT_SECRET: zod.string(),
   JWT_EXPIRY: zod.string(),
-  NODEMAILER_SERVICE: zod.string(),
   NODEMAILER_HOST: zod.string(),
   NODEMAILER_PORT: zod.coerce.number(),
   NODEMAILER_SECURE: zod.coerce.boolean(),

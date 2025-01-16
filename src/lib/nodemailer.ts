@@ -3,7 +3,6 @@ import nodemailer from "nodemailer";
 import { env } from "./env";
 
 const nodemailerTransporter = nodemailer.createTransport({
-  service: env.NODEMAILER_SERVICE,
   host: env.NODEMAILER_HOST,
   port: env.NODEMAILER_PORT,
   secure: env.NODEMAILER_SECURE,
