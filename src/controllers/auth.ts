@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { OtpType } from "@prisma/client";
 import argon from "argon2";
 
+import { TierConstraints } from "../constants/tiers";
 import { BadResponse, NotFoundResponse, handleErrors } from "../lib/error";
 import { sendOTP } from "../services/mail";
 import { deleteOTPByUser, getOTPByUser, upsertOTP } from "../services/otp";
@@ -46,10 +47,12 @@ async function signUp(request: Request, response: Response) {
     const { user } = await upsertUserByEmail(
       {
         email,
+        role,
       },
       {
         password: hashedPassword,
-        role,
+        totalStorage: TierConstraints.FREE.maxStorage,
+        usedStorage: 0,
       },
     );
 

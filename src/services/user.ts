@@ -1,4 +1,4 @@
-import { type Prisma, Role } from "@prisma/client";
+import { type Prisma, Role, type Tier } from "@prisma/client";
 
 import { TierConstraints } from "../constants/tiers";
 import { prisma } from "../lib/prisma";
@@ -105,8 +105,13 @@ async function getUsers(
 
 async function createUser(payload: {
   email: string;
-  password?: string;
+  password: string;
   role?: Role;
+  tier?: Tier;
+  totalStorage: number;
+  usedStorage: number;
+  isVerified?: boolean;
+  isDeleted?: boolean;
 }) {
   const user = await prisma.user.create({
     data: {
@@ -141,7 +146,15 @@ async function createUser(payload: {
 
 async function updateUserById(
   query: { id: string; role?: Role },
-  payload: Prisma.UserUpdateInput,
+  payload: {
+    password?: string;
+    role?: Role;
+    tier?: Tier;
+    totalStorage?: number;
+    usedStorage?: number;
+    isVerified?: boolean;
+    isDeleted?: boolean;
+  },
 ) {
   const user = await prisma.user.update({
     where: {
@@ -175,7 +188,15 @@ async function updateUserById(
 
 async function updateUserByEmail(
   query: { email: string; role?: Role },
-  payload: Prisma.UserUpdateInput,
+  payload: {
+    password?: string;
+    role?: Role;
+    tier?: Tier;
+    totalStorage?: number;
+    usedStorage?: number;
+    isVerified?: boolean;
+    isDeleted?: boolean;
+  },
 ) {
   const user = await prisma.user.update({
     where: {
@@ -209,19 +230,34 @@ async function updateUserByEmail(
 
 async function upsertUserByEmail(
   query: { email: string; role?: Role },
-  payload: Prisma.UserUpdateInput,
+  payload: {
+    password: string;
+    role?: Role;
+    tier?: Tier;
+    totalStorage: number;
+    usedStorage: number;
+    isVerified?: boolean;
+    isDeleted?: boolean;
+  },
 ) {
   const user = await prisma.user.upsert({
     where: {
       email: query.email,
       role: query.role,
     },
-    update: payload,
+    update: {
+      email: query.email,
+      role: query.role,
+      password: payload.password,
+      totalStorage: payload.totalStorage,
+      usedStorage: payload.usedStorage,
+    },
     create: {
       email: query.email,
       role: query.role,
-      totalStorage: TierConstraints.FREE.maxStorage,
-      usedStorage: 0,
+      password: payload.password,
+      totalStorage: payload.totalStorage,
+      usedStorage: payload.usedStorage,
     },
     select: {
       id: true,
