@@ -350,7 +350,7 @@ async function refresh(request: Request, response: Response) {
       tier: request.user.tier,
       totalStorage: request.user.totalStorage,
       usedStorage: request.user.usedStorage,
-      isVerified: request.user.isVerified,
+      isVerified: true,
       updatedAt: request.user.updatedAt,
     });
 

@@ -46,7 +46,7 @@ authRouter.post(
 authRouter.post(
   "/refresh",
   verifyRequest({
-    isVerified: false,
+    isVerified: true,
   }),
   refresh,
 );
