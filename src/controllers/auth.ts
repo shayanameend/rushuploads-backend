@@ -54,6 +54,9 @@ async function signUp(request: Request, response: Response) {
         totalStorage: TierConstraints.FREE.maxStorage,
         usedStorage: 0,
       },
+      {
+        password: hashedPassword,
+      },
     );
 
     if (!user) {

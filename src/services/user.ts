@@ -1,4 +1,4 @@
-import { type Prisma, Role, type Tier } from "@prisma/client";
+import { Role, type Tier } from "@prisma/client";
 
 import { TierConstraints } from "../constants/tiers";
 import { prisma } from "../lib/prisma";
@@ -230,12 +230,21 @@ async function updateUserByEmail(
 
 async function upsertUserByEmail(
   query: { email: string; role?: Role },
-  payload: {
-    password: string;
+  create: {
+    password?: string;
     role?: Role;
     tier?: Tier;
     totalStorage: number;
     usedStorage: number;
+    isVerified?: boolean;
+    isDeleted?: boolean;
+  },
+  update: {
+    password?: string;
+    role?: Role;
+    tier?: Tier;
+    totalStorage?: number;
+    usedStorage?: number;
     isVerified?: boolean;
     isDeleted?: boolean;
   },
@@ -245,19 +254,25 @@ async function upsertUserByEmail(
       email: query.email,
       role: query.role,
     },
-    update: {
-      email: query.email,
-      role: query.role,
-      password: payload.password,
-      totalStorage: payload.totalStorage,
-      usedStorage: payload.usedStorage,
-    },
     create: {
       email: query.email,
-      role: query.role,
-      password: payload.password,
-      totalStorage: payload.totalStorage,
-      usedStorage: payload.usedStorage,
+      password: create.password,
+      role: create.role,
+      tier: create.tier,
+      totalStorage: create.totalStorage,
+      usedStorage: create.usedStorage,
+      isVerified: create.isVerified,
+      isDeleted: create.isDeleted,
+    },
+    update: {
+      email: query.email,
+      password: update.password,
+      role: update.role,
+      tier: update.tier,
+      totalStorage: update.totalStorage,
+      usedStorage: update.usedStorage,
+      isVerified: update.isVerified,
+      isDeleted: update.isDeleted,
     },
     select: {
       id: true,

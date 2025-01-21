@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 
+import { TierConstraints } from "../constants/tiers";
 import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
 import {
@@ -199,7 +200,16 @@ async function sendFileMail(request: Request, response: Response) {
     const expiresAt = new Date(Date.now() + expiresInMs);
 
     const users = await Promise.all(
-      to.map((email) => upsertUserByEmail({ email }, {})),
+      to.map((email) =>
+        upsertUserByEmail(
+          { email },
+          {
+            totalStorage: TierConstraints.FREE.maxStorage,
+            usedStorage: 0,
+          },
+          {},
+        ),
+      ),
     );
 
     const [_p1, p2, _p3] = await Promise.all([
