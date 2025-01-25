@@ -2,32 +2,87 @@ import type { Prisma } from "@prisma/client";
 
 import path from "node:path";
 
-import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
+  CompleteMultipartUploadCommand
+} from "@aws-sdk/client-s3";
 import { v4 as uuid } from "uuid";
 
 import { env } from "../lib/env";
 import { prisma } from "../lib/prisma";
 import { s3Client } from "../lib/s3";
 
-async function uploadFiles(payload: {
-  rawFiles: Express.Multer.File[];
+interface ChunkUploadMetadata {
+  key: string;
+  uploadId: string;
+}
+
+async function initiateMultipartUpload(payload: {
+  originalName: string;
+  mimeType: string
 }) {
-  return await Promise.all(
-    payload.rawFiles.map(async (file) => {
-      file.filename = `${file.fieldname}-${uuid()}${path.extname(
-        file.originalname,
-      )}`;
+  const filename = `${uuid()}${path.extname(
+    payload.originalName,
+  )}`;
 
-      const command = new PutObjectCommand({
-        Bucket: env.AWS_BUCKET,
-        Key: file.filename,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-      });
+  const multipartUploadCommand = new CreateMultipartUploadCommand({
+    Bucket: env.AWS_BUCKET,
+    Key: filename,
+    ContentType: payload.mimeType,
+  });
 
-      return s3Client.send(command);
-    }),
-  );
+  const multipartUploadResponse = await s3Client.send(multipartUploadCommand);
+
+  return {
+    key: filename,
+    uploadId: multipartUploadResponse.UploadId,
+  };
+}
+
+async function uploadFileChunk(payload: {
+  uploadMetadata: ChunkUploadMetadata;
+  partNumber: number;
+  body: Buffer;
+}) {
+  const uploadPartCommand = new UploadPartCommand({
+    Bucket: env.AWS_BUCKET,
+    Key: payload.uploadMetadata.key,
+    UploadId: payload.uploadMetadata.uploadId,
+    PartNumber: payload.partNumber,
+    Body: payload.body,
+  });
+
+  const uploadPartResponse = await s3Client.send(uploadPartCommand);
+
+  return {
+    key: payload.uploadMetadata.key,
+    partNumber: payload.partNumber,
+    eTag: uploadPartResponse.ETag,
+  };
+}
+
+async function completeMultipartUpload(payload: {
+  uploadedParts: { PartNumber: number; ETag: string }[];
+  uploadMetadata: ChunkUploadMetadata;
+}) {
+  const { uploadMetadata, uploadedParts } = payload;
+
+  const completeUploadCommand = new CompleteMultipartUploadCommand({
+    Bucket: env.AWS_BUCKET,
+    Key: uploadMetadata.key,
+    UploadId: uploadMetadata.uploadId,
+    MultipartUpload: {
+      Parts: uploadedParts,
+    },
+  });
+
+  await s3Client.send(completeUploadCommand);
+
+  return {
+    key: uploadMetadata.key,
+  };
 }
 
 async function removeFile(payload: { key: string }) {
@@ -112,16 +167,20 @@ async function getSharedFilesByUserId(query: {
 async function createFiles(payload: {
   userId: string;
   expiresAt: Date;
-  rawFiles: Express.Multer.File[];
+  files: {
+    originalName: string;
+    name: string;
+    type: string
+  }[]
   sharedToUserIds: string[];
 }) {
   const files = await prisma.$transaction(
-    payload.rawFiles.map((file) =>
+    payload.files.map((file) =>
       prisma.file.create({
         data: {
-          originalName: file.originalname,
-          name: file.filename,
-          type: file.mimetype,
+          originalName: file.originalName,
+          name: file.name,
+          type: file.type,
           expiredAt: payload.expiresAt,
           sharedToUsers: {
             connect: payload.sharedToUserIds.map((userId) => ({
@@ -192,10 +251,12 @@ async function updateFileById(
 }
 
 export {
-  uploadFiles,
-  removeFile,
+  initiateMultipartUpload,
+  uploadFileChunk,
+  completeMultipartUpload,
   getFilesByUserId,
   getSharedFilesByUserId,
+  removeFile,
   createFiles,
   updateFileById,
 };
