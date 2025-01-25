@@ -25,8 +25,10 @@ app.use(
   }),
 );
 app.use(morgan("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: Number.POSITIVE_INFINITY }));
+app.use(
+  express.urlencoded({ extended: true, limit: Number.POSITIVE_INFINITY }),
+);
 app.use(expandResponse);
 
 app.use("/auth", authRouter);

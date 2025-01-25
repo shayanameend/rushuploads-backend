@@ -32,6 +32,7 @@ async function upload(
 
   const upload = multer({
     storage: multer.memoryStorage(),
+    limits: { fileSize: Number.POSITIVE_INFINITY },
     // limits: allowedLimits,
     // fileFilter: (_request: Request, file, cb) => {
     //   try {
