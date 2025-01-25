@@ -3,10 +3,10 @@ import type { Prisma } from "@prisma/client";
 import path from "node:path";
 
 import {
-  DeleteObjectCommand,
+  CompleteMultipartUploadCommand,
   CreateMultipartUploadCommand,
+  DeleteObjectCommand,
   UploadPartCommand,
-  CompleteMultipartUploadCommand
 } from "@aws-sdk/client-s3";
 import { v4 as uuid } from "uuid";
 
@@ -21,11 +21,9 @@ interface ChunkUploadMetadata {
 
 async function initiateMultipartUpload(payload: {
   originalName: string;
-  mimeType: string
+  mimeType: string;
 }) {
-  const filename = `${uuid()}${path.extname(
-    payload.originalName,
-  )}`;
+  const filename = `${uuid()}${path.extname(payload.originalName)}`;
 
   const multipartUploadCommand = new CreateMultipartUploadCommand({
     Bucket: env.AWS_BUCKET,
@@ -57,7 +55,6 @@ async function uploadFileChunk(payload: {
   const uploadPartResponse = await s3Client.send(uploadPartCommand);
 
   return {
-    key: payload.uploadMetadata.key,
     partNumber: payload.partNumber,
     eTag: uploadPartResponse.ETag,
   };
@@ -170,8 +167,8 @@ async function createFiles(payload: {
   files: {
     originalName: string;
     name: string;
-    type: string
-  }[]
+    type: string;
+  }[];
   sharedToUserIds: string[];
 }) {
   const files = await prisma.$transaction(

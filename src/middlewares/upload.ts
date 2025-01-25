@@ -51,7 +51,7 @@ async function upload(
     //     return handleErrors({ response, error });
     //   }
     // },
-  }).array("files");
+  }).single("file");
 
   upload(request, response, async (error: unknown) => {
     try {

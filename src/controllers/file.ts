@@ -4,11 +4,13 @@ import { TierConstraints } from "../constants/tiers";
 import { env } from "../lib/env";
 import { BadResponse, handleErrors } from "../lib/error";
 import {
+  completeMultipartUpload,
   createFiles,
   getFilesByUserId,
   getSharedFilesByUserId,
+  initiateMultipartUpload,
   updateFileById,
-  uploadFiles,
+  uploadFileChunk,
 } from "../services/file";
 import { createLink, getLinkById } from "../services/link";
 import { createMail, sendFiles } from "../services/mail";
@@ -21,6 +23,65 @@ import {
   getLinkParamsSchema,
   sendFileMailBodySchema,
 } from "../validators/file";
+
+async function startMultipartUpload(request: Request, response: Response) {
+  try {
+    const { originalName, mimeType } = request.body;
+
+    const { key, uploadId } = await initiateMultipartUpload({
+      originalName,
+      mimeType,
+    });
+
+    return response.success(
+      { data: { key, uploadId } },
+      { message: "Multipart upload initiated successfully!" },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
+async function uploadChunk(request: Request, response: Response) {
+  try {
+    const { key, uploadId, chunkNumber } = request.body;
+
+    const chunk = request.file.buffer;
+
+    const { eTag } = await uploadFileChunk({
+      partNumber: chunkNumber,
+      body: chunk,
+      uploadMetadata: { key: key, uploadId: uploadId },
+    });
+
+    return response.success(
+      { data: { eTag } },
+      { message: "Chunk uploaded successfully!" },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
+async function finalizeMultipartUpload(request: Request, response: Response) {
+  try {
+    const { key, uploadId, uploadedParts } = request.body;
+
+    await completeMultipartUpload({
+      uploadedParts,
+      uploadMetadata: { key, uploadId },
+    });
+
+    return response.success(
+      { data: {} },
+      {
+        message: "Multipart upload completed successfully!",
+      },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
 
 async function getUserSharedFiles(request: Request, response: Response) {
   try {
@@ -102,15 +163,10 @@ async function getLink(request: Request, response: Response) {
 
 async function generateFileLink(request: Request, response: Response) {
   try {
-    const { title, message, expiresInDays } = generateFileLinkBodySchema.parse(
-      request.body,
-    );
+    const { title, message, expiresInDays, files } =
+      generateFileLinkBodySchema.parse(request.body);
 
-    const rawFiles = (request.files as Express.Multer.File[]) ?? [];
-
-    if (rawFiles.length < 1) {
-      throw new BadResponse("No Files Uploaded!");
-    }
+    const rawFiles = [];
 
     const totalFileSize = rawFiles.reduce((acc, file) => acc + file.size, 0);
 
@@ -126,13 +182,12 @@ async function generateFileLink(request: Request, response: Response) {
 
     const expiresAt = new Date(Date.now() + expiresInMs);
 
-    const [_p1, p2, _p3] = await Promise.all([
-      uploadFiles({ rawFiles }),
-
+    const [p2, _p3] = await Promise.all([
       createFiles({
         userId: request.user.id,
         expiresAt,
-        rawFiles,
+        // @ts-ignore
+        files,
         sharedToUserIds: [],
       }),
 
@@ -175,15 +230,10 @@ async function sendFileMail(request: Request, response: Response) {
       .split(",")
       .map((email: string) => email.trim());
 
-    const { to, title, message, expiresInDays } = sendFileMailBodySchema.parse(
-      request.body,
-    );
+    const { to, title, message, expiresInDays, files } =
+      sendFileMailBodySchema.parse(request.body);
 
-    const rawFiles = (request.files as Express.Multer.File[]) ?? [];
-
-    if (rawFiles.length < 1) {
-      throw new BadResponse("No Files Uploaded!");
-    }
+    const rawFiles = [];
 
     const totalFileSize = rawFiles.reduce((acc, file) => acc + file.size, 0);
 
@@ -212,13 +262,12 @@ async function sendFileMail(request: Request, response: Response) {
       ),
     );
 
-    const [_p1, p2, _p3] = await Promise.all([
-      uploadFiles({ rawFiles }),
-
+    const [p2, _p3] = await Promise.all([
       createFiles({
         userId: request.user.id,
         expiresAt,
-        rawFiles,
+        // @ts-ignore
+        files: files,
         sharedToUserIds: users.map(({ user }) => user.id),
       }),
 
@@ -287,6 +336,9 @@ async function deleteFile(request: Request, response: Response) {
 }
 
 export {
+  startMultipartUpload,
+  uploadChunk,
+  finalizeMultipartUpload,
   generateFileLink,
   sendFileMail,
   getUserSharedFiles,

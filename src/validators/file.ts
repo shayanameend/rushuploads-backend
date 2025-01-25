@@ -14,6 +14,23 @@ const generateFileLinkBodySchema = zod.object({
   expiresInDays: zod.coerce.number({
     message: "Expires In Days must be a number!",
   }),
+  files: zod
+    .array(
+      zod.object({
+        originalName: zod.string({
+          message: "Original Name must be a string!",
+        }),
+        name: zod.string({
+          message: "Name must be a string!",
+        }),
+        type: zod.string({
+          message: "Type must be a string!",
+        }),
+      }),
+    )
+    .min(1, {
+      message: "No Files Uploaded!",
+    }),
 });
 
 const sendFileMailBodySchema = zod.object({
@@ -43,6 +60,23 @@ const sendFileMailBodySchema = zod.object({
   expiresInDays: zod.coerce.number({
     message: "Expires In Days must be a number!",
   }),
+  files: zod
+    .array(
+      zod.object({
+        originalName: zod.string({
+          message: "Original Name must be a string!",
+        }),
+        name: zod.string({
+          message: "Name must be a string!",
+        }),
+        type: zod.string({
+          message: "Type must be a string!",
+        }),
+      }),
+    )
+    .min(1, {
+      message: "No Files Uploaded!",
+    }),
 });
 
 const getLinkParamsSchema = zod.object({
