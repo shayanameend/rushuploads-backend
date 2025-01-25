@@ -18,7 +18,12 @@ const app = express();
 
 app.use("/subscriptions/webhook", express.raw({ type: "application/json" }));
 
-app.use(cors({ origin: "*" }));
+app.use(
+  cors({
+    origin: "*",
+    maxAge: 7 * 86400, // 7 * 24 hrs
+  }),
+);
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
