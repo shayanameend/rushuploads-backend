@@ -10,6 +10,7 @@ import {
   getUserSharedFiles,
   sendFileMail,
   startMultipartUpload,
+  updateFile,
   uploadChunk,
 } from "../controllers/file";
 import { verifyRequest } from "../middlewares/auth";
@@ -60,6 +61,12 @@ fileRouter.post(
   "/mail",
   verifyRequest({ isVerified: true, role: Role.USER }),
   sendFileMail,
+);
+
+fileRouter.put(
+  "/:fileId",
+  verifyRequest({ isVerified: true, role: Role.USER }),
+  updateFile,
 );
 
 fileRouter.delete(

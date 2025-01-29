@@ -85,6 +85,12 @@ const getLinkParamsSchema = zod.object({
   }),
 });
 
+const updateFileParamsSchema = zod.object({
+  fileId: zod.string({
+    message: "File ID must be a string!",
+  }),
+});
+
 const deleteFileParamsSchema = zod.object({
   fileId: zod.string({
     message: "File ID must be a string!",
@@ -95,5 +101,6 @@ export {
   generateFileLinkBodySchema,
   sendFileMailBodySchema,
   getLinkParamsSchema,
+  updateFileParamsSchema,
   deleteFileParamsSchema,
 };

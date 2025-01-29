@@ -108,6 +108,7 @@ async function getFilesByUserId(query: {
       originalName: true,
       name: true,
       type: true,
+      downloads: true,
       isExpired: true,
       isDeleted: true,
       expiredAt: true,
@@ -115,6 +116,11 @@ async function getFilesByUserId(query: {
       user: {
         select: {
           email: true,
+          profile: {
+            select: {
+              fullName: true,
+            },
+          },
         },
       },
     },
@@ -144,6 +150,7 @@ async function getSharedFilesByUserId(query: {
           originalName: true,
           name: true,
           type: true,
+          downloads: true,
           isExpired: true,
           isDeleted: true,
           expiredAt: true,
@@ -151,6 +158,11 @@ async function getSharedFilesByUserId(query: {
           user: {
             select: {
               email: true,
+              profile: {
+                select: {
+                  fullName: true,
+                },
+              },
             },
           },
         },
@@ -195,6 +207,7 @@ async function createFiles(payload: {
           originalName: true,
           name: true,
           type: true,
+          downloads: true,
           isExpired: true,
           isDeleted: true,
           expiredAt: true,
@@ -202,6 +215,11 @@ async function createFiles(payload: {
           user: {
             select: {
               email: true,
+              profile: {
+                select: {
+                  fullName: true,
+                },
+              },
             },
           },
         },
@@ -232,6 +250,7 @@ async function updateFileById(
       originalName: true,
       name: true,
       type: true,
+      downloads: true,
       isExpired: true,
       isDeleted: true,
       expiredAt: true,
@@ -239,6 +258,11 @@ async function updateFileById(
       user: {
         select: {
           email: true,
+          profile: {
+            select: {
+              fullName: true,
+            },
+          },
         },
       },
     },

@@ -87,6 +87,7 @@ model File {
   originalName String  @map("original_name")
   name         String
   type         String
+  downloads    Int     @default(0)
   isExpired    Boolean @default(false) @map("is_expired")
   isDeleted    Boolean @default(false) @map("is_deleted")
 

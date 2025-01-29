@@ -14,7 +14,6 @@ import {
 } from "../services/file";
 import { createLink, getLinkById } from "../services/link";
 import { createMail, sendFiles } from "../services/mail";
-import { createReward } from "../services/reward";
 import { updateUserById, upsertUserByEmail } from "../services/user";
 import { validateFileConstraints } from "../utils/file";
 import {
@@ -22,6 +21,7 @@ import {
   generateFileLinkBodySchema,
   getLinkParamsSchema,
   sendFileMailBodySchema,
+  updateFileParamsSchema,
 } from "../validators/file";
 
 async function startMultipartUpload(request: Request, response: Response) {
@@ -141,10 +141,6 @@ async function getLink(request: Request, response: Response) {
     }));
 
     link.files = augmentedFiles;
-
-    const ip = request.socket.remoteAddress;
-
-    await createReward({ ip, linkId: link.id });
 
     return response.success(
       {
@@ -309,6 +305,24 @@ async function sendFileMail(request: Request, response: Response) {
   }
 }
 
+async function updateFile(request: Request, response: Response) {
+  try {
+    const { fileId } = updateFileParamsSchema.parse(request.params);
+
+    const { file } = await updateFileById(
+      { fileId, userId: request.user.id },
+      request.body,
+    );
+
+    return response.success(
+      { file },
+      { message: "File Updated Successfully!" },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
 async function deleteFile(request: Request, response: Response) {
   try {
     const { fileId } = deleteFileParamsSchema.parse(request.params);
@@ -340,5 +354,6 @@ export {
   getUserSharedFiles,
   getUserReceivedFiles,
   getLink,
+  updateFile,
   deleteFile,
 };
