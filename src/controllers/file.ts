@@ -14,7 +14,7 @@ import {
 } from "../services/file";
 import { createLink, getLinkById } from "../services/link";
 import { createMail, sendFiles } from "../services/mail";
-import { createReward, getRewardByIpAndLinkId } from "../services/reward";
+import { createReward } from "../services/reward";
 import { updateUserById, upsertUserByEmail } from "../services/user";
 import { validateFileConstraints } from "../utils/file";
 import {
@@ -144,11 +144,7 @@ async function getLink(request: Request, response: Response) {
 
     const ip = request.socket.remoteAddress;
 
-    const { reward } = await getRewardByIpAndLinkId({ ip, linkId });
-
-    if (!reward) {
-      await createReward({ ip, linkId: link.id });
-    }
+    await createReward({ ip, linkId: link.id });
 
     return response.success(
       {

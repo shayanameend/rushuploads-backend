@@ -2,27 +2,12 @@ import type { Prisma } from "@prisma/client";
 
 import { prisma } from "../lib/prisma";
 
-export async function getRewardByIpAndLinkId(query: {
-  ip: string;
-  linkId: string;
-}) {
-  const reward = await prisma.reward.findUnique({
-    where: {
-      ip: query.ip,
-      linkId: query.linkId,
-    },
-  });
-
-  return { reward };
-}
-
 export async function createReward(payload: {
   ip: string;
   linkId: string;
 }) {
   const reward = await prisma.reward.create({
     data: {
-      ip: payload.ip,
       link: {
         connect: {
           id: payload.linkId,

@@ -146,13 +146,9 @@ model Subscription {
 model Reward {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  ip String @map("ip")
-
-  linkId String @unique @map("link_id") @db.ObjectId
+  linkId String @map("link_id") @db.ObjectId
   link   Link   @relation(fields: [linkId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
-
-  @@unique([ip, linkId])
 }
