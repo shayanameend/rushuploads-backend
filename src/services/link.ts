@@ -60,14 +60,26 @@ async function getLinkById(query: { id: string }) {
           originalName: true,
           name: true,
           type: true,
+          downloads: true,
           isExpired: true,
+          isDeleted: true,
           expiredAt: true,
           updatedAt: true,
-        },
-      },
-      user: {
-        select: {
-          email: true,
+          user: {
+            select: {
+              email: true,
+              profile: {
+                select: {
+                  fullName: true,
+                },
+              },
+            },
+          },
+          link: {
+            select: {
+              id: true,
+            },
+          },
         },
       },
     },
