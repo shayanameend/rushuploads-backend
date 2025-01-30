@@ -123,6 +123,11 @@ async function getFilesByUserId(query: {
           },
         },
       },
+      link: {
+        select: {
+          id: true,
+        },
+      },
     },
   });
 
@@ -163,6 +168,11 @@ async function getSharedFilesByUserId(query: {
                   fullName: true,
                 },
               },
+            },
+          },
+          link: {
+            select: {
+              id: true,
             },
           },
         },
@@ -222,6 +232,11 @@ async function createFiles(payload: {
               },
             },
           },
+          link: {
+            select: {
+              id: true,
+            },
+          },
         },
       }),
     ),
@@ -263,6 +278,11 @@ async function updateFileById(
               fullName: true,
             },
           },
+        },
+      },
+      link: {
+        select: {
+          id: true,
         },
       },
     },
