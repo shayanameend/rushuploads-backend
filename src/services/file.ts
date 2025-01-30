@@ -248,7 +248,7 @@ async function createFiles(payload: {
 async function updateFileById(
   query: {
     fileId: string;
-    userId: string;
+    userId?: string;
     type?: string;
   },
   payload: Prisma.FileUpdateInput,

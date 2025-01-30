@@ -310,7 +310,7 @@ async function downloadFile(request: Request, response: Response) {
     const { fileId } = updateFileParamsSchema.parse(request.params);
 
     const { file } = await updateFileById(
-      { fileId, userId: request.user.id },
+      { fileId },
       {
         downloads: {
           increment: 1,
