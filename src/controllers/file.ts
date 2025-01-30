@@ -305,18 +305,22 @@ async function sendFileMail(request: Request, response: Response) {
   }
 }
 
-async function updateFile(request: Request, response: Response) {
+async function downloadFile(request: Request, response: Response) {
   try {
     const { fileId } = updateFileParamsSchema.parse(request.params);
 
     const { file } = await updateFileById(
       { fileId, userId: request.user.id },
-      request.body,
+      {
+        downloads: {
+          increment: 1,
+        },
+      },
     );
 
     return response.success(
       { file },
-      { message: "File Updated Successfully!" },
+      { message: "File Downloaded Successfully!" },
     );
   } catch (error) {
     return handleErrors({ response, error });
@@ -354,6 +358,6 @@ export {
   getUserSharedFiles,
   getUserReceivedFiles,
   getLink,
-  updateFile,
+  downloadFile,
   deleteFile,
 };

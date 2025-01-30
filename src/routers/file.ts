@@ -3,6 +3,7 @@ import { Router } from "express";
 
 import {
   deleteFile,
+  downloadFile,
   finalizeMultipartUpload,
   generateFileLink,
   getLink,
@@ -10,7 +11,6 @@ import {
   getUserSharedFiles,
   sendFileMail,
   startMultipartUpload,
-  updateFile,
   uploadChunk,
 } from "../controllers/file";
 import { verifyRequest } from "../middlewares/auth";
@@ -63,11 +63,7 @@ fileRouter.post(
   sendFileMail,
 );
 
-fileRouter.put(
-  "/:fileId",
-  verifyRequest({ isVerified: true, role: Role.USER }),
-  updateFile,
-);
+fileRouter.post("/download/:fileId", downloadFile);
 
 fileRouter.delete(
   "/:fileId",
