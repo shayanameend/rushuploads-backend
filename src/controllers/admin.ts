@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { handleErrors } from "../lib/error";
 import { prisma } from "../lib/prisma";
 import { getUsers } from "../services/user";
+import { updateFileById } from "../services/file";
 
 async function getKPIs(_request: Request, response: Response) {
   try {
@@ -179,43 +180,10 @@ async function claimRewards(request: Request, response: Response) {
 
     const { claims } = request.body;
 
-    const file = await prisma.file.update({
-      where: {
-        id,
-      },
-      data: {
-        claims: {
-          increment: claims,
-        },
-      },
-      select: {
-        id: true,
-        originalName: true,
-        name: true,
-        type: true,
-        downloads: true,
-        claims: true,
-        isExpired: true,
-        isDeleted: true,
-        expiredAt: true,
-        updatedAt: true,
-        user: {
-          select: {
-            email: true,
-            profile: {
-              select: {
-                fullName: true,
-              },
-            },
-          },
-        },
-        link: {
-          select: {
-            id: true,
-          },
-        },
-      },
-    });
+    const { file } = await updateFileById(
+      { fileId: id },
+      { claims: { decrement: -1 * claims } },
+    );
 
     return response.success(
       {
