@@ -32,6 +32,7 @@ async function getKPIs(_request: Request, response: Response) {
             name: true,
             type: true,
             downloads: true,
+            claims: true,
             isExpired: true,
             isDeleted: true,
             expiredAt: true,
@@ -106,6 +107,7 @@ async function getAllFiles(_request: Request, response: Response) {
         name: true,
         type: true,
         downloads: true,
+        claims: true,
         isExpired: true,
         isDeleted: true,
         expiredAt: true,
@@ -171,4 +173,68 @@ async function deleteFile(request: Request, response: Response) {
   }
 }
 
-export { getKPIs, getAllUsers, getAllFiles, deleteUser, deleteFile };
+async function claimRewards(request: Request, response: Response) {
+  try {
+    const { id } = request.params;
+
+    const { count } = request.body;
+
+    const file = await prisma.file.update({
+      where: {
+        id,
+      },
+      data: {
+        claims: {
+          increment: count,
+        },
+      },
+      select: {
+        id: true,
+        originalName: true,
+        name: true,
+        type: true,
+        downloads: true,
+        claims: true,
+        isExpired: true,
+        isDeleted: true,
+        expiredAt: true,
+        updatedAt: true,
+        user: {
+          select: {
+            email: true,
+            profile: {
+              select: {
+                fullName: true,
+              },
+            },
+          },
+        },
+        link: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    return response.success(
+      {
+        data: {
+          file,
+        },
+      },
+      { message: "Rewards claimed successfully" },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
+export {
+  getKPIs,
+  getAllUsers,
+  getAllFiles,
+  deleteUser,
+  deleteFile,
+  claimRewards,
+};
