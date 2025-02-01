@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import {
+  claimRewards,
   deleteFile,
   deleteUser,
   getAllFiles,
@@ -36,6 +37,15 @@ adminRouter.get(
     role: "ADMIN",
   }),
   getAllFiles,
+);
+
+adminRouter.put(
+  "/rewards/claim",
+  verifyRequest({
+    isVerified: true,
+    role: "ADMIN",
+  }),
+  claimRewards,
 );
 
 adminRouter.delete(
