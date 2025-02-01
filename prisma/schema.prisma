@@ -115,8 +115,7 @@ model Link {
   userId String @map("user_id") @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])
 
-  files   File[]
-  rewards Reward[]
+  files File[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -139,16 +138,6 @@ model Subscription {
 
   userId String @unique @map("user_id") @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
-}
-
-model Reward {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  linkId String @map("link_id") @db.ObjectId
-  link   Link   @relation(fields: [linkId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")

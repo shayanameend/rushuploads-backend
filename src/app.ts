@@ -9,10 +9,10 @@ import { expandResponse } from "./middlewares/response";
 import { authRouter } from "./routers/auth";
 import { fileRouter } from "./routers/file";
 import { profileRouter } from "./routers/profile";
-import { rewardRouter } from "./routers/reward";
 import { subscriptionRouter } from "./routers/subscription";
 import { supportRouter } from "./routers/support";
 import { userRouter } from "./routers/user";
+import { adminRouter } from "./routers/admin";
 
 const app = express();
 
@@ -31,12 +31,12 @@ app.use(
 );
 app.use(expandResponse);
 
+app.use("/admin", adminRouter);
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
 app.use("/profiles", profileRouter);
 app.use("/files", fileRouter);
 app.use("/subscriptions", subscriptionRouter);
-app.use("/rewards", rewardRouter);
 app.use("/support", supportRouter);
 
 app.get("/test", verifyRequest({ isVerified: true }), (_request, response) => {
