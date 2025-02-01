@@ -35,7 +35,7 @@ const signUpSchema = zod.object({
     .enum([Role.USER, Role.ADMIN], {
       message: "Role must be either 'USER' or 'ADMIN'",
     })
-    .default(Role.USER),
+    .optional(),
 });
 
 const signInSchema = zod.object({
@@ -61,7 +61,7 @@ const signInSchema = zod.object({
     .enum([Role.USER, Role.ADMIN], {
       message: "Role must be either 'USER' or 'ADMIN'",
     })
-    .default(Role.USER),
+    .optional(),
 });
 
 const resetPasswordSchema = zod.object({
@@ -76,7 +76,7 @@ const resetPasswordSchema = zod.object({
     .enum([Role.USER, Role.ADMIN], {
       message: "Role must be either 'USER' or 'ADMIN'",
     })
-    .default(Role.USER),
+    .optional(),
 });
 
 const verifyOtpSchema = zod.object({
