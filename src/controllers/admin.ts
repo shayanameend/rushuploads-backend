@@ -177,7 +177,7 @@ async function claimRewards(request: Request, response: Response) {
   try {
     const { id } = request.params;
 
-    const { count } = request.body;
+    const { claims } = request.body;
 
     const file = await prisma.file.update({
       where: {
@@ -185,7 +185,7 @@ async function claimRewards(request: Request, response: Response) {
       },
       data: {
         claims: {
-          increment: count,
+          increment: claims,
         },
       },
       select: {
