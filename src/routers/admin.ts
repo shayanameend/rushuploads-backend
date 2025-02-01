@@ -40,7 +40,7 @@ adminRouter.get(
 );
 
 adminRouter.put(
-  "/rewards/claim",
+  "/rewards/claim/:id",
   verifyRequest({
     isVerified: true,
     role: "ADMIN",
