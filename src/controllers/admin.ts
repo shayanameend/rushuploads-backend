@@ -1,0 +1,79 @@
+import type { Request, Response } from "express";
+
+import { handleErrors } from "../lib/error";
+import { prisma } from "../lib/prisma";
+
+async function getKPIs(_request: Request, response: Response) {
+  try {
+    const [users, files, downloads, topDownloadedFiles] =
+      await prisma.$transaction([
+        prisma.user.count({ where: { isDeleted: false } }),
+        prisma.file.count({ where: { isDeleted: false } }),
+        prisma.file.aggregate({
+          where: {
+            downloads: {
+              gt: 0,
+            },
+            isDeleted: false,
+          },
+          _sum: { downloads: true },
+        }),
+        prisma.file.findMany({
+          where: {
+            downloads: {
+              gt: 0,
+            },
+            isDeleted: false,
+          },
+          select: {
+            id: true,
+            originalName: true,
+            name: true,
+            type: true,
+            downloads: true,
+            isExpired: true,
+            isDeleted: true,
+            expiredAt: true,
+            updatedAt: true,
+            user: {
+              select: {
+                email: true,
+                profile: {
+                  select: {
+                    fullName: true,
+                  },
+                },
+              },
+            },
+            link: {
+              select: {
+                id: true,
+              },
+            },
+          },
+          orderBy: { downloads: "desc" },
+          take: 10,
+        }),
+      ]);
+
+    return response.success(
+      {
+        data: {
+          counts: {
+            users,
+            files,
+            downloads: downloads._sum.downloads,
+          },
+          files: {
+            topDownloads: topDownloadedFiles,
+          },
+        },
+      },
+      { message: "KPIs retrieved successfully" },
+    );
+  } catch (error) {
+    return handleErrors({ response, error });
+  }
+}
+
+export { getKPIs };

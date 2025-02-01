@@ -6,13 +6,13 @@ import morgan from "morgan";
 
 import { verifyRequest } from "./middlewares/auth";
 import { expandResponse } from "./middlewares/response";
+import { adminRouter } from "./routers/admin";
 import { authRouter } from "./routers/auth";
 import { fileRouter } from "./routers/file";
 import { profileRouter } from "./routers/profile";
 import { subscriptionRouter } from "./routers/subscription";
 import { supportRouter } from "./routers/support";
 import { userRouter } from "./routers/user";
-import { adminRouter } from "./routers/admin";
 
 const app = express();
 
