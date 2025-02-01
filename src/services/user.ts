@@ -1,4 +1,4 @@
-import { Role, type Tier } from "@prisma/client";
+import type { Role, Tier } from "@prisma/client";
 
 import { TierConstraints } from "../constants/tiers";
 import { prisma } from "../lib/prisma";
@@ -71,11 +71,7 @@ async function getUsers(
     isDeleted?: boolean;
     skip?: number;
     take?: number;
-  } = {
-    role: Role.USER,
-    skip: 0,
-    take: 10,
-  },
+  } = {},
 ) {
   const users = await prisma.user.findMany({
     where: {
