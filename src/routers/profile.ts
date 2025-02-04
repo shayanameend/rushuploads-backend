@@ -1,6 +1,5 @@
 import { Router } from "express";
 
-import { Role } from "@prisma/client";
 import {
   createOneProfile,
   getOneProfile,

@@ -38,36 +38,24 @@ fileRouter.post(
 
 fileRouter.get(
   "/shared",
-  verifyRequest({ isVerified: true, role: Role.USER }),
+  verifyRequest({ isVerified: true }),
   getUserSharedFiles,
 );
 
 fileRouter.get(
   "/received",
-  verifyRequest({ isVerified: true, role: Role.USER }),
+  verifyRequest({ isVerified: true }),
   getUserReceivedFiles,
 );
 
 fileRouter.get("/link/:linkId", getLink);
 
-fileRouter.post(
-  "/link",
-  verifyRequest({ isVerified: true, role: Role.USER }),
-  generateFileLink,
-);
+fileRouter.post("/link", verifyRequest({ isVerified: true }), generateFileLink);
 
-fileRouter.post(
-  "/mail",
-  verifyRequest({ isVerified: true, role: Role.USER }),
-  sendFileMail,
-);
+fileRouter.post("/mail", verifyRequest({ isVerified: true }), sendFileMail);
 
 fileRouter.post("/download/:fileId", downloadFile);
 
-fileRouter.delete(
-  "/:fileId",
-  verifyRequest({ isVerified: true, role: Role.USER }),
-  deleteFile,
-);
+fileRouter.delete("/:fileId", verifyRequest({ isVerified: true }), deleteFile);
 
 export { fileRouter };
