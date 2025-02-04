@@ -10,31 +10,10 @@ import { verifyRequest } from "../middlewares/auth";
 
 const profileRouter = Router();
 
-profileRouter.get(
-  "/",
-  verifyRequest({
-    isVerified: true,
-    role: Role.USER,
-  }),
-  getOneProfile,
-);
+profileRouter.get("/", verifyRequest({ isVerified: true }), getOneProfile);
 
-profileRouter.post(
-  "/",
-  verifyRequest({
-    isVerified: true,
-    role: Role.USER,
-  }),
-  createOneProfile,
-);
+profileRouter.post("/", verifyRequest({ isVerified: true }), createOneProfile);
 
-profileRouter.put(
-  "/",
-  verifyRequest({
-    isVerified: true,
-    role: Role.USER,
-  }),
-  updateOneProfile,
-);
+profileRouter.put("/", verifyRequest({ isVerified: true }), updateOneProfile);
 
 export { profileRouter };

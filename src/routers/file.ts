@@ -1,4 +1,3 @@
-import { Role } from "@prisma/client";
 import { Router } from "express";
 
 import {
@@ -20,20 +19,20 @@ const fileRouter = Router();
 
 fileRouter.post(
   "/start",
-  verifyRequest({ isVerified: true, role: Role.USER }),
+  verifyRequest({ isVerified: true }),
   startMultipartUpload,
 );
 
 fileRouter.post(
   "/upload",
-  verifyRequest({ isVerified: true, role: Role.USER }),
+  verifyRequest({ isVerified: true }),
   upload,
   uploadChunk,
 );
 
 fileRouter.post(
   "/finalize",
-  verifyRequest({ isVerified: true, role: Role.USER }),
+  verifyRequest({ isVerified: true }),
   finalizeMultipartUpload,
 );
 

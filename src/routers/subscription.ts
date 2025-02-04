@@ -1,4 +1,3 @@
-import { Role } from "@prisma/client";
 import { Router } from "express";
 
 import {
@@ -12,13 +11,13 @@ const subscriptionRouter = Router();
 
 subscriptionRouter.post(
   "/checkout",
-  verifyRequest({ isVerified: true, role: Role.USER }),
+  verifyRequest({ isVerified: true }),
   createCheckout,
 );
 
 subscriptionRouter.post(
   "/portal",
-  verifyRequest({ isVerified: true, role: Role.USER }),
+  verifyRequest({ isVerified: true }),
   createPortal,
 );
 
